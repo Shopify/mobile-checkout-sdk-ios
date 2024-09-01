@@ -19,6 +19,7 @@
 		86C569C72B15DA2D00F26028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86C569C62B15DA2D00F26028 /* Assets.xcassets */; };
 		86C569ED2B15DB0A00F26028 /* StorefrontClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C569EC2B15DB0A00F26028 /* StorefrontClient.swift */; };
 		86C569F22B15DC6F00F26028 /* StorefrontGraphQL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C569F12B15DC6F00F26028 /* StorefrontGraphQL.swift */; };
+		C00E59032C7897E90089F75E /* ShopifyCheckoutSheetKit in Frameworks */ = {isa = PBXBuildFile; productRef = C00E59022C7897E90089F75E /* ShopifyCheckoutSheetKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00E59032C7897E90089F75E /* ShopifyCheckoutSheetKit in Frameworks */,
 				6A71777E2B90DECF00ED3B99 /* Buy in Frameworks */,
 				6A71777C2B90DEB000ED3B99 /* ShopifyCheckoutSheetKit in Frameworks */,
 				6ACED4192B909C5C00AC6947 /* ShopifyCheckoutSheetKit in Frameworks */,
@@ -166,6 +168,7 @@
 				6ACED4182B909C5C00AC6947 /* ShopifyCheckoutSheetKit */,
 				6A71777B2B90DEB000ED3B99 /* ShopifyCheckoutSheetKit */,
 				6A71777D2B90DECF00ED3B99 /* Buy */,
+				C00E59022C7897E90089F75E /* ShopifyCheckoutSheetKit */,
 			);
 			productName = SwiftUIExample;
 			productReference = 86C569BF2B15DA2B00F26028 /* SwiftUIExample.app */;
@@ -575,6 +578,10 @@
 			productName = Buy;
 		};
 		6ACED4182B909C5C00AC6947 /* ShopifyCheckoutSheetKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ShopifyCheckoutSheetKit;
+		};
+		C00E59022C7897E90089F75E /* ShopifyCheckoutSheetKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ShopifyCheckoutSheetKit;
 		};

@@ -4,6 +4,12 @@
 <dict>
 	<key>StorefrontDomain</key>
 	<string>$(STOREFRONT_DOMAIN)</string>
+	<key>ShopId</key>
+	<string>$(SHOP_ID)</string>
+	<key>CustomerAccountsClientId</key>
+	<string>$(CUSTOMER_ACCOUNTS_API_CLIENT_ID)</string>
+	<key>CustomerAccountsRedirectUri</key>
+	<string>$(CUSTOMER_ACCOUNTS_API_REDIRECT_URI)</string>
 	<key>StorefrontAccessToken</key>
 	<string>$(STOREFRONT_ACCESS_TOKEN)</string>
 	<key>Address1</key>

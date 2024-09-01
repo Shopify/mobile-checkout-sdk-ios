@@ -40,6 +40,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		catalogController.tabBarItem.title = "Browse"
 		catalogController.navigationItem.title = "Product details"
 
+		/// Login
+		let loginController = LoginViewController()
+		loginController.tabBarItem.image = UIImage(systemName: "person.2.circle")
+		loginController.tabBarItem.title = "Login"
+		loginController.navigationItem.title = "Login"
+
 		/// Cart
 		let cartController = CartViewController()
 		cartController.tabBarItem.image = UIImage(systemName: "cart")
@@ -52,6 +58,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 			),
 			UINavigationController(
 				rootViewController: cartController
+			),
+			UINavigationController(
+				rootViewController: loginController
 			)
 		]
 

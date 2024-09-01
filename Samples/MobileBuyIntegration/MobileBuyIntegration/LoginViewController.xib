@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="LoginViewController" customModule="MobileBuyIntegration" customModuleProvider="target">
+            <connections>
+                <outlet property="loginButton" destination="suc-fm-VVU" id="1UC-7V-262"/>
+                <outlet property="view" destination="4yO-Tr-LYQ" id="ddd-iM-nOz"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" id="4yO-Tr-LYQ">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="suc-fm-VVU">
+                            <rect key="frame" x="163" y="409" width="66" height="35"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <state key="normal" title="Button"/>
+                            <buttonConfiguration key="configuration" style="filled" title="Login"/>
+                            <connections>
+                                <action selector="login" destination="-1" eventType="touchDown" id="wGw-5M-TNw"/>
+                            </connections>
+                        </button>
+                        <view contentMode="scaleToFill" id="YUy-XH-qmc">
+                            <rect key="frame" x="-457" y="1520" width="393" height="852"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" id="AZy-eh-pf7">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="DYh-Uy-Evx">
+                                            <rect key="frame" x="163" y="409" width="66" height="35"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <state key="normal" title="Button"/>
+                                            <buttonConfiguration key="configuration" style="filled" title="Login"/>
+                                            <connections>
+                                                <action selector="login" destination="-1" eventType="touchDown" id="XeR-54-XqF"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <viewLayoutGuide key="safeArea" id="ozn-Lt-6mS"/>
+                                    <viewLayoutGuide key="contentLayoutGuide" id="qmx-oT-Pq6"/>
+                                    <viewLayoutGuide key="frameLayoutGuide" id="Cf6-bs-2pm"/>
+                                </scrollView>
+                            </subviews>
+                            <viewLayoutGuide key="safeArea" id="g4I-Fx-CBe"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <accessibility key="accessibilityConfiguration">
+                                <accessibilityTraits key="traits" button="YES"/>
+                            </accessibility>
+                        </view>
+                    </subviews>
+                    <viewLayoutGuide key="safeArea" id="h7q-9b-0Yb"/>
+                    <viewLayoutGuide key="contentLayoutGuide" id="GCE-IK-w8b"/>
+                    <viewLayoutGuide key="frameLayoutGuide" id="AUF-5q-RA8"/>
+                </scrollView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <accessibility key="accessibilityConfiguration">
+                <accessibilityTraits key="traits" button="YES"/>
+            </accessibility>
+            <point key="canvasLocation" x="55" y="21"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
