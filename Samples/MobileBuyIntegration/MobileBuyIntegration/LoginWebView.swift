@@ -57,9 +57,6 @@ class LoginWebView: WKWebView {
 extension LoginWebView: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
 
-		print("redirect uri \(String(describing: self.redirectUri))")
-		print("auth data \(String(describing: self.authData))")
-
 		guard let nonNullRedirectUrl = self.redirectUri, let nonNullAuthData = self.authData else {
 			decisionHandler(.allow)
 			return

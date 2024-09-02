@@ -20,6 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
 import Foundation
 import CommonCrypto
 
@@ -43,6 +44,12 @@ class CustomerAccountClient {
 	private let redirectUri: String
 	private let customerAccountsBaseUrl: String
 	private let jsonDecoder: JSONDecoder = JSONDecoder()
+
+	// Note: store tokens in Keychain in any production app
+	internal var refreshToken: String?
+	internal var idToken: String?
+	internal var accessToken: String?
+	internal var sfApiAccessToken: String?
 
 	init() {
 		guard
@@ -92,6 +99,13 @@ class CustomerAccountClient {
 		)
 	}
 
+	func decodedIdToken() -> [String: Any?]? {
+		guard let idToken = CustomerAccountClient.shared.idToken else {
+			return nil
+		}
+		return JwtDecoder.shared.decode(jwtToken: idToken)
+	}
+
 	/// Handles authorization code redirect, by extracting the code param, and requesting an access token with that code
 	/// and the associated code verifier
 	func handleAuthorizationCodeRedirect(_ url: URL, authData: AuthData, callback: @escaping (String?, String?) -> Void) {
@@ -111,8 +125,8 @@ class CustomerAccountClient {
 		}
 	}
 
-	/// Makes an accessToken request with the authorization code
-	func requestAccessToken(code: String, codeVerifier: String, callback: @escaping (String?, String?) -> Void) {
+	/// Requests accessToken with the authorization code and code verifier
+	private func requestAccessToken(code: String, codeVerifier: String, callback: @escaping (String?, String?) -> Void) {
 		guard let url = URL(string: "\(self.customerAccountsBaseUrl)/auth/oauth/token") else {
 			return
 		}
@@ -137,13 +151,15 @@ class CustomerAccountClient {
 					return
 				}
 
+				self.idToken = tokenResponse.idToken
+				self.refreshToken = tokenResponse.refreshToken
 				self.performTokenExchange(accessToken: tokenResponse.accessToken, callback: callback)
 			}
 		)
 	}
 
-	/// Exchange a token for a new one with the customer accounts audience and scopes.
-	func performTokenExchange(accessToken: String, callback: @escaping (String?, String?) -> Void) {
+	/// Exchanges access token for a new token that can be used to access Customer Accounts API resources
+	private func performTokenExchange(accessToken: String, callback: @escaping (String?, String?) -> Void) {
 		guard let url = URL(string: "\(self.customerAccountsBaseUrl)/auth/oauth/token") else {
 			callback(nil, "Couldn't build token exchange URL")
 			return
@@ -165,17 +181,18 @@ class CustomerAccountClient {
 			],
 			body: encodeToFormURLEncoded(parameters: params),
 			completionHandler: { data, _, _ in
-				guard let tokenResponse = self.jsonDecoder.decodeOrNil(CustomerAccountAccessTokenResponse.self, from: data!) else {
+				guard let tokenResponse = self.jsonDecoder.decodeOrNil(CustomerAccountExchangeTokenResponse.self, from: data!) else {
 					callback(nil, "Couldn't decode token exchange response")
 					return
 				}
+				self.accessToken = tokenResponse.accessToken
 				self.exchangeForStorefrontCustomerAccessToken(customerAccessToken: tokenResponse.accessToken, callback: callback)
 			}
 		)
 	}
 
-	/// Exchanges a Customer Accounts API access token for a Storefront API customer access token that can be used in cart mutations
-	func exchangeForStorefrontCustomerAccessToken(customerAccessToken: String, callback: @escaping (String?, String?) -> Void) {
+	/// Exchanges a Customer Accounts API access token for a Storefront API customer access token that can be used in Storefront API (and cart mutations)
+	private func exchangeForStorefrontCustomerAccessToken(customerAccessToken: String, callback: @escaping (String?, String?) -> Void) {
 		guard let url = URL(string: "\(customerAccountsBaseUrl)/account/customer/api/2024-07/graphql") else {
 			return
 		}
@@ -286,10 +303,34 @@ struct AuthData {
 struct CustomerAccountAccessTokenResponse: Codable {
 	let accessToken: String
 	let expiresIn: Int
+	let idToken: String
+	let refreshToken: String
+	let scope: String
+	let tokenType: String
 
 	enum CodingKeys: String, CodingKey {
 		case accessToken = "access_token"
 		case expiresIn = "expires_in"
+		case idToken = "id_token"
+		case refreshToken = "refresh_token"
+		case scope = "scope"
+		case tokenType = "token_type"
+	}
+}
+
+struct CustomerAccountExchangeTokenResponse: Codable {
+	let accessToken: String
+	let expiresIn: Int
+	let tokenType: String
+	let scope: String
+	let issuedTokenType: String
+
+	enum CodingKeys: String, CodingKey {
+		case accessToken = "access_token"
+		case expiresIn = "expires_in"
+		case tokenType = "token_type"
+		case scope = "scope"
+		case issuedTokenType = "issued_token_type"
 	}
 }
 

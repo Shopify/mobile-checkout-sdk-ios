@@ -42,7 +42,7 @@ class LoginViewController: UIViewController {
 	@IBAction func login() {
 		let client = CustomerAccountClient.shared
 		guard let authData = client.buildAuthData() else {
-			print("No auth data")
+			print("No auth data available to build authorization URL")
 			return
 		}
 

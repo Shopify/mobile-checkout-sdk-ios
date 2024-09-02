@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,47 +22,25 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" id="4yO-Tr-LYQ">
-                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <rect key="frame" x="0.0" y="59" width="393" height="673"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="suc-fm-VVU">
-                            <rect key="frame" x="163" y="409" width="66" height="35"/>
+                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" toolTip="Login" buttonType="system" lineBreakMode="middleTruncation" id="suc-fm-VVU">
+                            <rect key="frame" x="155" y="311" width="82.000000000012278" height="51"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <state key="normal" title="Button"/>
-                            <buttonConfiguration key="configuration" style="filled" title="Login"/>
+                            <buttonConfiguration key="configuration" style="filled" title="Login" buttonSize="large"/>
                             <connections>
                                 <action selector="login" destination="-1" eventType="touchDown" id="wGw-5M-TNw"/>
                             </connections>
                         </button>
-                        <view contentMode="scaleToFill" id="YUy-XH-qmc">
-                            <rect key="frame" x="-457" y="1520" width="393" height="852"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" id="AZy-eh-pf7">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="DYh-Uy-Evx">
-                                            <rect key="frame" x="163" y="409" width="66" height="35"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <state key="normal" title="Button"/>
-                                            <buttonConfiguration key="configuration" style="filled" title="Login"/>
-                                            <connections>
-                                                <action selector="login" destination="-1" eventType="touchDown" id="XeR-54-XqF"/>
-                                            </connections>
-                                        </button>
-                                    </subviews>
-                                    <viewLayoutGuide key="safeArea" id="ozn-Lt-6mS"/>
-                                    <viewLayoutGuide key="contentLayoutGuide" id="qmx-oT-Pq6"/>
-                                    <viewLayoutGuide key="frameLayoutGuide" id="Cf6-bs-2pm"/>
-                                </scrollView>
-                            </subviews>
-                            <viewLayoutGuide key="safeArea" id="g4I-Fx-CBe"/>
-                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                            <accessibility key="accessibilityConfiguration">
-                                <accessibilityTraits key="traits" button="YES"/>
-                            </accessibility>
-                        </view>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login with new customer accounts" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="3Gv-oS-4gz" userLabel="Login Label">
+                            <rect key="frame" x="-1" y="269" width="392.99999999992929" height="21"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" name="AccentColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
                     </subviews>
                     <viewLayoutGuide key="safeArea" id="h7q-9b-0Yb"/>
                     <viewLayoutGuide key="contentLayoutGuide" id="GCE-IK-w8b"/>
@@ -73,10 +52,13 @@
             <accessibility key="accessibilityConfiguration">
                 <accessibilityTraits key="traits" button="YES"/>
             </accessibility>
-            <point key="canvasLocation" x="55" y="21"/>
+            <point key="canvasLocation" x="54.198473282442748" y="20.422535211267608"/>
         </view>
     </objects>
     <resources>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

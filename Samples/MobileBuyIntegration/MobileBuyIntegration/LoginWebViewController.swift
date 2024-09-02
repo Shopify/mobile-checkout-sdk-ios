@@ -26,29 +26,9 @@ import WebKit
 
 class LoginWebViewController: UIViewController, UIAdaptivePresentationControllerDelegate, LoginWebViewDelegate {
 
-	func loginComplete(token: String) {
-		DispatchQueue.main.async {
-			print("Logged in with token \(token)")
-			self.dismiss(animated: true)
-		}
-	}
-
-	func loginFailed(error: String) {
-		DispatchQueue.main.async {
-			print("Failed to log in with error \(error)")
-			self.dismiss(animated: true)
-		}
-	}
-
 	internal var loginWebView: LoginWebView
 	private let authData: AuthData
 	private let redirectUri: String
-
-	private lazy var closeBarButtonItem: UIBarButtonItem = {
-		return UIBarButtonItem(
-			barButtonSystemItem: .close, target: self, action: #selector(close)
-		)
-	}()
 
 	internal var progressObserver: NSKeyValueObservation?
 
@@ -64,15 +44,33 @@ class LoginWebViewController: UIViewController, UIAdaptivePresentationController
 
 		super.init(nibName: nil, bundle: nil)
 
-		title = "Login" // todo
-
-		navigationItem.rightBarButtonItem = closeBarButtonItem
+		title = "Login"
 
 		loginView.viewDelegate = self
 	}
 
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
+	}
+
+	func loginComplete(token: String) {
+		DispatchQueue.main.async {
+			let idToken = CustomerAccountClient.shared.decodedIdToken()
+			let email = idToken?["email"] ?? ""
+			let message = "Logged in (or was already logged in) - \(email!)"
+
+			self.showAlert(title: "Login complete", message: message, completion: {
+				self.dismiss(animated: true)
+			})
+		}
+	}
+
+	func loginFailed(error: String) {
+		DispatchQueue.main.async {
+			self.showAlert(title: "Login failed", message: "Failed to log in with error \(error)", completion: {
+				self.dismiss(animated: true)
+			})
+		}
 	}
 
 	override public func viewDidLoad() {
@@ -88,16 +86,15 @@ class LoginWebViewController: UIViewController, UIAdaptivePresentationController
 
 		loginWebView.load(URLRequest(url: authData.authorizationUrl))
 	}
+}
 
-	@IBAction internal func close() {
-		didCancel()
-	}
+extension LoginWebViewController {
+	func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {
+		let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+		alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+			completion?()
+		}))
 
-	public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-		didCancel()
-	}
-
-	private func didCancel() {
-//		delegate?.checkoutDidCancel()
+		self.present(alert, animated: true, completion: nil)
 	}
 }
