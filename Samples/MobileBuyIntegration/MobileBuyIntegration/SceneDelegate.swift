@@ -54,13 +54,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 		tabBarController.viewControllers = [
 			UINavigationController(
+				rootViewController: loginController
+			),
+			UINavigationController(
 				rootViewController: catalogController
 			),
 			UINavigationController(
 				rootViewController: cartController
-			),
-			UINavigationController(
-				rootViewController: loginController
 			)
 		]
 

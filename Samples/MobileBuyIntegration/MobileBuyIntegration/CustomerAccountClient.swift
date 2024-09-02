@@ -231,6 +231,7 @@ class CustomerAccountClient {
 					}
 
 					let storefrontToken = storefrontCustomerAccessToken.data.storefrontCustomerAccessTokenCreate.customerAccessToken
+					self.sfApiAccessToken = storefrontToken
 					callback(storefrontToken, nil)
 				}
 			)

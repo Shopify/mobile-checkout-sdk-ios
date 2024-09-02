@@ -132,8 +132,20 @@ class CartManager {
 		}
 	}
 
+	func authenticatedCart() {
+
+	}
+
 	private func performCartCreate(items: [GraphQL.ID] = [], handler: @escaping CartResultHandler) {
-		let input = (appConfiguration.useVaultedState) ? vaultedStateCart(items) : defaultCart(items)
+		let sfApiAccessToken = CustomerAccountClient.shared.sfApiAccessToken
+
+		let input = if appConfiguration.useAuthenticatedState && sfApiAccessToken != nil {
+			authenticatedCart(sfApiAccessToken!, items)
+		} else if appConfiguration.useVaultedState {
+			vaultedStateCart(items)
+		} else {
+			defaultCart(items)
+		}
 
 		let countryCode: Storefront.CountryCode = appConfiguration.useVaultedState
 		? ((Storefront.CountryCode(rawValue: Bundle.main.infoDictionary?["Country"] as? String ?? "")) ?? .ca)
@@ -142,6 +154,10 @@ class CartManager {
 		let mutation = Storefront.buildMutation(inContext: Storefront.InContextDirective(country: countryCode)) { $0
 			.cartCreate(input: input) { $0
 				.cart { $0.cartManagerFragment() }
+				.userErrors {
+					$0.field()
+					$0.message()
+				}
 			}
 		}
 
@@ -202,6 +218,15 @@ class CartManager {
 			buyerIdentity: Input(orNull: Storefront.CartBuyerIdentityInput.create(
 				email: Input(orNull: email),
 				deliveryAddressPreferences: Input(orNull: deliveryAddressPreferences)
+			))
+		)
+	}
+
+	private func authenticatedCart(_ customerAccessToken: String, _ items: [GraphQL.ID] = []) -> Storefront.CartInput {
+		return Storefront.CartInput.create(
+			lines: Input(orNull: items.map({ Storefront.CartLineInput.create(merchandiseId: $0) })),
+			buyerIdentity: Input(orNull: Storefront.CartBuyerIdentityInput.create(
+				customerAccessToken: Input(orNull: customerAccessToken)
 			))
 		)
 	}
