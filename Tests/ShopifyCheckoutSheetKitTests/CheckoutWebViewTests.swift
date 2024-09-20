@@ -199,7 +199,7 @@ class CheckoutWebViewTests: XCTestCase {
 
 		waitForExpectations(timeout: 5) { _ in
 			switch self.mockDelegate.errorReceived {
-			case .some(.checkoutUnavailable(let message, let code, let recoverable)):
+			case .some(.checkoutUnavailable(let message, _, let recoverable)):
 				XCTAssertEqual(message, "unauthorized")
 				XCTAssertFalse(recoverable)
 			default:

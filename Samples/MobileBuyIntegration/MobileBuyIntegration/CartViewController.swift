@@ -220,6 +220,12 @@ extension CartViewController: CheckoutDelegate {
 			if let genericEvent = mapToGenericEvent(customEvent: customEvent) {
 				recordAnalyticsEvent(genericEvent)
 			}
+		case .alertDisplayedEvent(let alertDisplayedEvent):
+			print("[PIXEL - AlertDisplayed]", alertDisplayedEvent.name!)
+			recordAnalyticsEvent(mapToGenericEvent(alertDisplayedEvent: alertDisplayedEvent))
+		case .uiExtensionErroredEvent(let uiExtensionErroredEvent):
+			print("[PIXEL - UIExtensionErrored]", uiExtensionErroredEvent.name!)
+			recordAnalyticsEvent(mapToGenericEvent(uiExtensionErroredEvent: uiExtensionErroredEvent))
 		case .standardEvent(let standardEvent):
 			print("[PIXEL - Standard]", standardEvent.name!)
 			recordAnalyticsEvent(mapToGenericEvent(standardEvent: standardEvent))
@@ -267,6 +273,24 @@ extension CartViewController {
 		)
 	}
 
+	private func mapToGenericEvent(alertDisplayedEvent: AlertDisplayedEvent) -> AnalyticsEvent {
+		return AnalyticsEvent(
+			name: alertDisplayedEvent.name!,
+			userId: getUserId(),
+			timestamp: alertDisplayedEvent.timestamp!,
+			error: alertDisplayedEvent.data?.alert?.message ?? "Unknown alert"
+		)
+	}
+
+	private func mapToGenericEvent(uiExtensionErroredEvent: UIExtensionErroredEvent) -> AnalyticsEvent {
+		return AnalyticsEvent(
+			name: uiExtensionErroredEvent.name!,
+			userId: getUserId(),
+			timestamp: uiExtensionErroredEvent.timestamp!,
+			error: uiExtensionErroredEvent.data?.error?.message ?? "Unknown error"
+		)
+	}
+
 	private func decodeAndMap(event: CustomEvent, decoder: JSONDecoder = JSONDecoder()) throws -> AnalyticsEvent {
 		return AnalyticsEvent(
 			name: event.name!,
@@ -292,6 +316,7 @@ struct AnalyticsEvent: Codable {
 	var name = ""
 	var userId = ""
 	var timestamp = ""
+	var error = ""
 	var checkoutTotal: Double? = 0.0
 }
 

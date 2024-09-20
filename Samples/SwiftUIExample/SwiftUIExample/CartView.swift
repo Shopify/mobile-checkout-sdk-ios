@@ -78,6 +78,10 @@ struct CartView: View {
 								}
 								.onPixelEvent { event in
 									switch event {
+									case .alertDisplayedEvent(let event):
+										print("WebPixel - (alert_displayed)", event.name!)
+									case .uiExtensionErroredEvent(let event):
+										print("WebPixel - (ui_extension_errored)", event.name!)
 									case .standardEvent(let event):
 										print("WebPixel - (standard)", event.name!)
 									case .customEvent(let event):

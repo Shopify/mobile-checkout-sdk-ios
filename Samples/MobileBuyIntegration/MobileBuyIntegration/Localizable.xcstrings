@@ -25,9 +25,6 @@
     "No logs available" : {
 
     },
-    "Not supported in < iOS 15" : {
-
-    },
     "OK" : {
       "comment" : "Default action"
     },

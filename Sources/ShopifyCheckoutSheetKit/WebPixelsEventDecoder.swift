@@ -57,7 +57,7 @@ struct WebPixelsEventBody: Decodable {
 		context = try container.decode(Context.self, forKey: .context)
 
 		switch type {
-		case "standard":
+		case "standard", "extended-standard":
 			data = try container.decodeIfPresent([String: Any].self, forKey: .data)
 			customData = nil
 		case "custom":
@@ -89,7 +89,14 @@ class WebPixelsEventDecoder {
 		let webPixelsEvent = try JSONDecoder().decode(WebPixelsEvent.self, from: data)
 
 		switch webPixelsEvent.event.type {
-		case "standard":
+		case "standard", "extended-standard":
+			if webPixelsEvent.event.name == "alert_displayed" {
+				let alertDisplayed = AlertDisplayedEvent(from: webPixelsEvent.event)
+				return .alertDisplayedEvent(alertDisplayed)
+			} else if webPixelsEvent.name == "ui_extension_errored" {
+				let uiExtensionError = UIExtensionErroredEvent(from: webPixelsEvent.event)
+				return .uiExtensionErroredEvent(uiExtensionError)
+			}
 			let standardEvent = StandardEvent(from: webPixelsEvent.event)
 			return .standardEvent(standardEvent)
 		case "custom":

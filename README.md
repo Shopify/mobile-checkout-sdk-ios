@@ -327,15 +327,19 @@ extension MyViewController: ShopifyCheckoutSheetKitDelegate {
     // and is being directed outside the application.
   }
 
-  // Issued when the Checkout has emit a standard or custom Web Pixel event.
+  // Issued when the Checkout has emitted a standard or custom Web Pixel event.
   // Note that the event must be handled by the consuming app, and will not be sent from inside the checkout.
   // See below for more information.
   func checkoutDidEmitWebPixelEvent(event: PixelEvent) {
     switch event {
-      case .standardEvent(let standardEvent):
-        recordAnalyticsEvent(standardEvent)
-      case .customEvent(let customEvent):
-        recordAnalyticsEvent(customEvent)
+    case .alertDisplayedEvent(let alertDisplayedEvent):
+      recordAnalyticsEvent(alertDisplayedEvent)
+    case .uiExtensionErroredEvent(let uiExtensionErroredEvent):
+      recordAnalyticsEvent(uiExtensionErroredEvent)
+    case .standardEvent(let standardEvent):
+      recordAnalyticsEvent(standardEvent)
+    case .customEvent(let customEvent):
+      recordAnalyticsEvent(customEvent)
     }
   }
 }
@@ -391,6 +395,14 @@ class MyViewController: UIViewController {
   private func sendEventToAnalytics(event: CustomEvent) {
     // Send custom event to third-party providers
   }
+  
+  private func sendEventToAnalytics(event: AlertDisplayedEvent) {
+    // Send alert displayed event to third-party providers
+  }
+  
+  private func sendEventToAnalytics(event: UIExtensionErroredEvent) {
+    // Send ui extension errored event to third-party providers
+  }
 
   private func recordAnalyticsEvent(standardEvent: StandardEvent) {
     if hasPermissionToCaptureEvents() {
@@ -403,15 +415,37 @@ class MyViewController: UIViewController {
       sendEventToAnalytics(event: CustomEvent)
     }
   }
+  
+   private func recordAnalyticsEvent(customEvent: CustomEvent) {
+    if hasPermissionToCaptureEvents() {
+      sendEventToAnalytics(event: CustomEvent)
+    }
+  }
+
+  private func recordAnalyticsEvent(alertDisplayedEvent: AlertDisplayedEvent) {
+    if hasPermissionToCaptureEvents() {
+      sendEventToAnalytics(event: alertDisplayedEvent)
+    }
+  }
+  
+  private func recordAnalyticsEvent(uiExtensionErrorEvent: UIExtensionErroredEvent) {
+    if hasPermissionToCaptureEvents() {
+      sendEventToAnalytics(event: uiExtensionErroredEvent)
+    }
+  } 
 }
 
 extension MyViewController: ShopifyCheckoutSheetKitDelegate {
   func checkoutDidEmitWebPixelEvent(event: PixelEvent) {
     switch event {
-      case .standardEvent(let standardEvent):
-        recordAnalyticsEvent(standardEvent: standardEvent)
-      case .customEvent(let customEvent):
-        recordAnalyticsEvent(customEvent: customEvent)
+    case .alertDisplayedEvent(let alertDisplayedEvent):
+      recordAnalyticsEvent(alertDisplayedEvent: alertDisplayedEvent)
+    case .uiExtensionErroredEvent(let uiExtensionErroredEvent):
+      recordAnalyticsEvent(uiExtensionErroredEvent: uiExtensionErroredEvent)
+    case .standardEvent(let standardEvent):
+      recordAnalyticsEvent(standardEvent: standardEvent)
+    case .customEvent(let customEvent):
+      recordAnalyticsEvent(customEvent: customEvent)
     }
   }
 }

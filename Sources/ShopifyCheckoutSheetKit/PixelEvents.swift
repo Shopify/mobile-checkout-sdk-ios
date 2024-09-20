@@ -28,6 +28,98 @@ import Foundation
 public enum PixelEvent {
 	case customEvent(CustomEvent)
 	case standardEvent(StandardEvent)
+	case alertDisplayedEvent(AlertDisplayedEvent)
+	case uiExtensionErroredEvent(UIExtensionErroredEvent)
+}
+
+public struct AlertDisplayedEvent: Codable {
+	public let context: Context?
+	/// The ID of the customer event
+	public let id: String?
+	/// The name of the customer event
+	public let name: String?
+	/// The timestamp of when the customer event occurred, in [ISO
+	/// 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+	public let timestamp: String?
+
+	public let data: AlertDisplayedEventData?
+
+	enum CodingKeys: String, CodingKey {
+		case context, data, id, name, timestamp
+	}
+}
+
+public struct AlertDisplayedEventData: Codable {
+	public let alert: AlertDisplayedEventDataAlert?
+}
+
+public struct AlertDisplayedEventDataAlert: Codable {
+	/// The part of the page the alert relates to.
+	/// Follows the [Shopify Functions target format], for example "cart.deliveryGroups[0].deliveryAddress.address1".
+	public let target: String?
+	/// The value of the field at the time the alert was displayed or null if the error does not relate to an individual field.
+	public let value: String?
+	/// The type of alert that was displayed, current possible values are:
+	/// The type of error that occurred, current possible values are:
+	/// - `INPUT_REQUIRED` - A required field is empty.
+	/// - `INPUT_INVALID` - The input provided is incorrect or improperly formatted.
+	/// - `CONTACT_ERROR` - An alert related to a contact information issue was displayed.
+	/// - `DELIVERY_ERROR` - An alert related to a delivery issue was displayed.
+	/// - `PAYMENT_ERROR` - An alert related to a payment issue was displayed.
+	/// - `DISCOUNT_ERROR` - An alert related to a discount code or gift card issue was displayed.
+	/// - `INVENTORY_ERROR` - An alert related to an inventory issue was displayed.
+	/// - `MERCHANDISE_ERROR` - An alert related to a merchandise issue was displayed.
+	/// - `CHECKOUT_ERROR` - An alert related to a general checkout issue was displayed.
+	public let type: String?
+	/// The message that was displayed to the user when the alert was displayed.
+	public let message: String?
+}
+
+public struct UIExtensionErroredEvent: Codable {
+	public let context: Context?
+	/// The ID of the customer event
+	public let id: String?
+	/// The name of the customer event
+	public let name: String?
+	/// The timestamp of when the customer event occurred, in [ISO
+	/// 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+	public let timestamp: String?
+
+	public let data: UIExtensionErroredEventData?
+
+	enum CodingKeys: String, CodingKey {
+		case context, data, id, name, timestamp
+	}
+}
+
+public struct UIExtensionErroredEventData: Codable {
+	public let error: UIExtensionErroredEventDataError?
+}
+
+public struct UIExtensionErroredEventDataError: Codable {
+	/// The type of error that occurred. Current possible values:
+	///  - `EXTENSION_USAGE_ERROR` - An error caused by incorrect usage of extension APIs or UI components.
+	public let type: String?
+	/// The unique identifier of the app that the extension belongs to.
+	public let appId: String?
+	///  The name of the app that the extension belongs to.
+	public let appName: String?
+	/// The API version used by the extension
+	public let apiVersion: String?
+	/// The version of the app that encountered the error.
+	public let appVersion: String?
+	/// The name of the extension that encountered the error.
+	public let extensionName: String?
+	/// The [target](https://shopify.dev/docs/api/checkout-ui-extensions/latest/targets) of the extension, for example
+	/// "purchase.checkout.delivery-address.render-after".
+	public let extensionTarget: String?
+	/// The [placement reference](https://shopify.dev/docs/apps/build/checkout/test-checkout-ui-extensions#dynamic-targets) of the extension,
+	/// only populated for dynamic targets.
+	public let placementReference: String?
+	/// The message associated with the error that occurred.
+	public let message: String?
+	/// The stack trace associated with the error that occurred.
+	public let trace: String?
 }
 
 public struct StandardEvent: Codable {
@@ -632,6 +724,54 @@ public struct TransactionPaymentMethod: Codable {
 }
 
 // MARK: PixelEventsCheckoutCompleted convenience initializers and mutators
+
+extension AlertDisplayedEvent {
+	init(from webPixelsEventBody: WebPixelsEventBody) {
+		self.context = webPixelsEventBody.context
+		self.id = webPixelsEventBody.id
+		self.name = webPixelsEventBody.name
+		self.timestamp = webPixelsEventBody.timestamp
+		if let dataDict = webPixelsEventBody.data {
+			self.data = AlertDisplayedEventData(from: dataDict)
+		} else {
+			self.data = nil
+		}
+	}
+}
+
+extension AlertDisplayedEventData {
+	init?(from dictionary: [String: Any]) {
+		guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary, options: []),
+			  let pixelData = try? JSONDecoder().decode(AlertDisplayedEventData.self, from: jsonData) else {
+			return nil
+		}
+		self = pixelData
+	}
+}
+
+extension UIExtensionErroredEvent {
+	init(from webPixelsEventBody: WebPixelsEventBody) {
+		self.context = webPixelsEventBody.context
+		self.id = webPixelsEventBody.id
+		self.name = webPixelsEventBody.name
+		self.timestamp = webPixelsEventBody.timestamp
+		if let dataDict = webPixelsEventBody.data {
+			self.data = UIExtensionErroredEventData(from: dataDict)
+		} else {
+			self.data = nil
+		}
+	}
+}
+
+extension UIExtensionErroredEventData {
+	init?(from dictionary: [String: Any]) {
+		guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary, options: []),
+			  let pixelData = try? JSONDecoder().decode(UIExtensionErroredEventData.self, from: jsonData) else {
+			return nil
+		}
+		self = pixelData
+	}
+}
 
 extension StandardEvent {
 	init(from webPixelsEventBody: WebPixelsEventBody) {
