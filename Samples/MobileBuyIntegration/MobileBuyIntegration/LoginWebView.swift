@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 */
 
 import Foundation
-import WebKit
+@preconcurrency import WebKit
 
 class LoginWebView: WKWebView {
 
@@ -63,17 +63,13 @@ extension LoginWebView: WKNavigationDelegate {
 		}
 
 		if let url = action.request.url {
-			guard url.scheme == nonNullRedirectUrl.scheme else {
-				decisionHandler(.allow)
-				return
-			}
 
 			guard let redirectComponents = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
 				decisionHandler(.allow)
 				return
 			}
 
-			guard let host = redirectComponents.host, host == nonNullRedirectUrl.host else {
+            guard redirectComponents.scheme == nonNullRedirectUrl.scheme else {
 				decisionHandler(.allow)
 				return
 			}

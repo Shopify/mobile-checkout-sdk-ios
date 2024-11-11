@@ -24,34 +24,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import Buy
 import UIKit
 import ShopifyCheckoutSheetKit
+import SwiftUICore
+import Combine
 
 class LoginViewController: UIViewController {
 
 	@IBOutlet private var loginButton: UIButton!
+    @IBOutlet private var logoutButton: UIButton!
+    @IBOutlet private var refreshButton: UIButton!
+    @IBOutlet private var logoutView: UIView!
+    @IBOutlet private var loginView: UIView!
+
+    private var bag = Set<AnyCancellable>()
+    private var loginWebViewController: LoginWebViewController = LoginWebViewController()
+    private var customerAccountClient: CustomerAccountClient = CustomerAccountClient()
 
 	public init() {
 		super.init(nibName: nil, bundle: nil)
+        title = "Login"
 
-		title = "Login"
+        CustomerAccountClient.shared.$authenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] authenticated in
+                self?.authenticationUpdated(authenticated: authenticated)
+            }
+            .store(in: &bag)
+
+        self.authenticationUpdated(authenticated: CustomerAccountClient.shared.authenticated)
 	}
 
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
 
-	@IBAction func login() {
-		let client = CustomerAccountClient.shared
-		guard let authData = client.buildAuthData() else {
-			print("No auth data available to build authorization URL")
-			return
-		}
+    @IBAction func logout() {
+        loginWebViewController.logout()
+        present(loginWebViewController, animated: true, completion: nil)
+    }
 
-		let loginWebViewController = LoginWebViewController(authData: authData, redirectUri: client.getRedirectUri())
-		if #available(iOS 13.0, *) {
-			loginWebViewController.modalPresentationStyle = .automatic
-		} else {
-			loginWebViewController.modalPresentationStyle = .overFullScreen
-		}
+    @IBAction func refresh() {
+        loginWebViewController.refreshToken()
+        present(loginWebViewController, animated: true, completion: nil)
+    }
+
+    @IBAction func login() {
+        if #available(iOS 13.0, *) {
+            loginWebViewController.modalPresentationStyle = .automatic
+        } else {
+            loginWebViewController.modalPresentationStyle = .overFullScreen
+        }
+
+        loginWebViewController.login()
+
 		present(loginWebViewController, animated: true, completion: nil)
 	}
+
+    private func authenticationUpdated(authenticated: Bool) {
+        if isViewLoaded {
+            logoutView.isHidden = !authenticated
+            loginView.isHidden = authenticated
+        }
+    }
 }

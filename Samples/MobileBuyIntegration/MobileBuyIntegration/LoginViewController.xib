@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,6 +13,10 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="LoginViewController" customModule="MobileBuyIntegration" customModuleProvider="target">
             <connections>
                 <outlet property="loginButton" destination="suc-fm-VVU" id="1UC-7V-262"/>
+                <outlet property="loginView" destination="D3n-IS-Y7C" id="mSf-wo-Qy6"/>
+                <outlet property="logoutButton" destination="3fh-J8-vWX" id="Fvk-gA-iSh"/>
+                <outlet property="logoutView" destination="4h2-3u-dCQ" id="p9j-9K-yAc"/>
+                <outlet property="refreshButton" destination="JdP-pP-zY1" id="QXk-vl-1HD"/>
                 <outlet property="view" destination="4yO-Tr-LYQ" id="ddd-iM-nOz"/>
             </connections>
         </placeholder>
@@ -25,22 +29,55 @@
                     <rect key="frame" x="0.0" y="59" width="393" height="673"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
-                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" toolTip="Login" buttonType="system" lineBreakMode="middleTruncation" id="suc-fm-VVU">
-                            <rect key="frame" x="155" y="311" width="82.000000000012278" height="51"/>
+                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="D3n-IS-Y7C" userLabel="LoginButtonView">
+                            <rect key="frame" x="-21" y="249" width="432.99999999992929" height="133"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <state key="normal" title="Button"/>
-                            <buttonConfiguration key="configuration" style="filled" title="Login" buttonSize="large"/>
-                            <connections>
-                                <action selector="login" destination="-1" eventType="touchDown" id="wGw-5M-TNw"/>
-                            </connections>
-                        </button>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login with new customer accounts" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="3Gv-oS-4gz" userLabel="Login Label">
-                            <rect key="frame" x="-1" y="269" width="392.99999999992929" height="21"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login with new customer accounts" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="3Gv-oS-4gz" userLabel="Login Label">
+                                    <rect key="frame" x="20" y="20" width="392.99999999992929" height="21"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <color key="textColor" name="AccentColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <button toolTip="Login" opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="suc-fm-VVU">
+                                    <rect key="frame" x="176" y="62" width="82.000000000012278" height="51"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="filled" title="Login" buttonSize="large"/>
+                                    <connections>
+                                        <action selector="login" destination="-1" eventType="touchDown" id="wGw-5M-TNw"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" id="4h2-3u-dCQ" userLabel="LogoutButtonView">
+                            <rect key="frame" x="0.0" y="390" width="393" height="146"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                            <color key="textColor" name="AccentColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
+                            <subviews>
+                                <button toolTip="Login" opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="3fh-J8-vWX" userLabel="Logout">
+                                    <rect key="frame" x="149" y="87" width="94" height="51"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="filled" title="Logout" buttonSize="large"/>
+                                    <connections>
+                                        <action selector="logout" destination="-1" eventType="touchDown" id="fhM-iL-kiU"/>
+                                    </connections>
+                                </button>
+                                <button toolTip="Login" opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="JdP-pP-zY1" userLabel="Refresh">
+                                    <rect key="frame" x="123" y="28" width="146" height="51"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="filled" title="Refresh token" buttonSize="large"/>
+                                    <connections>
+                                        <action selector="refresh" destination="-1" eventType="touchDown" id="L7W-hr-nEw"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <viewLayoutGuide key="safeArea" id="fFt-qd-cJi"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
                     </subviews>
                     <viewLayoutGuide key="safeArea" id="h7q-9b-0Yb"/>
                     <viewLayoutGuide key="contentLayoutGuide" id="GCE-IK-w8b"/>

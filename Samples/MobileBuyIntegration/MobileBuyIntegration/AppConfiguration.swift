@@ -28,7 +28,7 @@ public struct AppConfiguration {
 	public var useVaultedState: Bool = false
 
 	/// Pass in customerAccessToken after user logs in
-	public var useAuthenticatedState: Bool = false
+	public var useAuthenticatedState: Bool = true
 
 	/// Logger to retain Web Pixel events
 	internal let webPixelsLogger = FileLogger("analytics.txt")

@@ -31,6 +31,7 @@ class CustomerAccountClient {
 	// OAuth
 	static let customerAccountsAudience = "30243aa5-17c1-465a-8493-944bcc4e88aa"
 	static let authorizationCodeGrantType = "authorization_code"
+    static let refreshTokenGrantType = "refresh_token"
 	static let tokenExchangeGrantType = "urn:ietf:params:oauth:grant-type:token-exchange"
 	static let accessTokenSubjectTokenType = "urn:ietf:params:oauth:token-type:access_token"
 	static let customerAPIScope = "https://api.customers.com/auth/customer.graphql"
@@ -44,12 +45,16 @@ class CustomerAccountClient {
 	private let redirectUri: String
 	private let customerAccountsBaseUrl: String
 	private let jsonDecoder: JSONDecoder = JSONDecoder()
+    private let accessTokenExpirationManager: AccessTokenExpirationManager = AccessTokenExpirationManager.shared
 
 	// Note: store tokens in Keychain in any production app
 	internal var refreshToken: String?
 	internal var idToken: String?
 	internal var accessToken: String?
 	internal var sfApiAccessToken: String?
+
+    @Published
+    var authenticated: Bool = false
 
 	init() {
 		guard
@@ -66,6 +71,26 @@ class CustomerAccountClient {
 		self.redirectUri = redirectUri ?? "shop.\(shopId).app://callback"
 		self.customerAccountsBaseUrl = "https://shopify.com/\(shopId)"
 	}
+
+    func isAuthenticated() -> Bool {
+        return self.authenticated
+    }
+
+    func getSfApiAccessToken() -> String? {
+        return self.sfApiAccessToken
+    }
+
+    func getAccessToken() -> String? {
+        return self.accessToken
+    }
+
+    func getIdToken() -> String? {
+        return self.idToken
+    }
+
+    func getRefreshToken() -> String? {
+        return self.refreshToken
+    }
 
 	func getRedirectUri() -> String {
 		return self.redirectUri
@@ -115,8 +140,8 @@ class CustomerAccountClient {
 			return
 		}
 
-		if authData.state != state {
-			callback(nil, "State param does not match")
+        if authData.state != state {
+			callback(nil, "State param does not match: \(state)")
 			return
 		}
 
@@ -124,6 +149,79 @@ class CustomerAccountClient {
 			requestAccessToken(code: code, codeVerifier: authData.codeVerifier, callback: callback)
 		}
 	}
+
+    func logout(idToken: String, callback: @escaping (String?, String?) -> Void) {
+        guard let url = URL(string: "https://shopify.com/authentication/\(self.shopId)/logout") else {
+            return
+        }
+
+        let params: [String: String] = [
+            "id_token_hint": idToken,
+            "post_logout_redirect_uri": self.redirectUri
+        ]
+
+        executeRequest(
+            url: url,
+            method: "GET",
+            query: params,
+            completionHandler: { _, response, _ in
+                let httpResponse = response as? HTTPURLResponse
+                guard httpResponse != nil, httpResponse?.statusCode == 200 else {
+                    callback(nil, "Failed to logout")
+                    return
+                }
+
+                self.resetAuthentication()
+
+                callback("Logged out successfully", nil)
+            }
+        )
+    }
+
+    func resetAuthentication() {
+        self.refreshToken = nil
+        self.accessToken = nil
+        self.sfApiAccessToken = nil
+        self.authenticated = false
+    }
+
+    func refreshAccessToken(refreshToken: String, callback: @escaping (String?, String?) -> Void) {
+        guard let url = URL(string: "\(self.customerAccountsBaseUrl)/auth/oauth/token") else {
+            return
+        }
+
+        let params: [String: String] = [
+            "client_id": clientId,
+            "grant_type": CustomerAccountClient.refreshTokenGrantType,
+            "refresh_token": self.refreshToken!
+        ]
+
+        executeRequest(
+            url: url,
+            headers: [
+                "Content-Type": CustomerAccountClient.formUrlEncoded
+            ],
+            body: encodeToFormURLEncoded(parameters: params),
+            completionHandler: { data, _, _ in
+                guard let tokenResponse = self.jsonDecoder.decodeOrNil(CustomerAccountRefreshedTokenResponse.self, from: data!) else {
+                    callback(nil, "Couldn't decode refresh access token response")
+                    return
+                }
+
+                self.refreshToken = tokenResponse.refreshToken
+                self.accessToken = tokenResponse.accessToken
+                self.accessTokenExpirationManager.addAccessToken(accessToken: tokenResponse.accessToken, expiresIn: tokenResponse.expiresIn)
+                self.exchangeForStorefrontCustomerAccessToken(
+                    customerAccessToken: tokenResponse.accessToken,
+                    refreshToken: tokenResponse.refreshToken,
+                    callback: callback
+                )
+                self.authenticated = true
+
+                callback(tokenResponse.accessToken, nil)
+            }
+        )
+    }
 
 	/// Requests accessToken with the authorization code and code verifier
 	private func requestAccessToken(code: String, codeVerifier: String, callback: @escaping (String?, String?) -> Void) {
@@ -148,51 +246,26 @@ class CustomerAccountClient {
 			completionHandler: { data, _, _ in
 				guard let tokenResponse = self.jsonDecoder.decodeOrNil(CustomerAccountAccessTokenResponse.self, from: data!) else {
 					print("Couldn't decode access token response")
+                    print("Response:", String(data: data!, encoding: .utf8)!)
 					return
 				}
 
 				self.idToken = tokenResponse.idToken
 				self.refreshToken = tokenResponse.refreshToken
-				self.performTokenExchange(accessToken: tokenResponse.accessToken, callback: callback)
-			}
-		)
-	}
-
-	/// Exchanges access token for a new token that can be used to access Customer Accounts API resources
-	private func performTokenExchange(accessToken: String, callback: @escaping (String?, String?) -> Void) {
-		guard let url = URL(string: "\(self.customerAccountsBaseUrl)/auth/oauth/token") else {
-			callback(nil, "Couldn't build token exchange URL")
-			return
-		}
-
-		let params = [
-			"grant_type": CustomerAccountClient.tokenExchangeGrantType,
-			"client_id": self.clientId,
-			"audience": CustomerAccountClient.customerAccountsAudience,
-			"subject_token": accessToken,
-			"subject_token_type": CustomerAccountClient.accessTokenSubjectTokenType,
-			"scopes": "https://api.customers.com/auth/customer.graphql"
-		]
-
-		executeRequest(
-			url: url,
-			headers: [
-				"Content-Type": CustomerAccountClient.formUrlEncoded
-			],
-			body: encodeToFormURLEncoded(parameters: params),
-			completionHandler: { data, _, _ in
-				guard let tokenResponse = self.jsonDecoder.decodeOrNil(CustomerAccountExchangeTokenResponse.self, from: data!) else {
-					callback(nil, "Couldn't decode token exchange response")
-					return
-				}
-				self.accessToken = tokenResponse.accessToken
-				self.exchangeForStorefrontCustomerAccessToken(customerAccessToken: tokenResponse.accessToken, callback: callback)
+                self.accessToken = tokenResponse.accessToken
+                self.accessTokenExpirationManager.addAccessToken(accessToken: tokenResponse.accessToken, expiresIn: tokenResponse.expiresIn)
+                self.exchangeForStorefrontCustomerAccessToken(
+                    customerAccessToken: tokenResponse.accessToken,
+                    refreshToken: tokenResponse.refreshToken,
+                    callback: callback
+                )
+                self.authenticated = true
 			}
 		)
 	}
 
 	/// Exchanges a Customer Accounts API access token for a Storefront API customer access token that can be used in Storefront API (and cart mutations)
-	private func exchangeForStorefrontCustomerAccessToken(customerAccessToken: String, callback: @escaping (String?, String?) -> Void) {
+    private func exchangeForStorefrontCustomerAccessToken(customerAccessToken: String, refreshToken: String, callback: @escaping (String?, String?) -> Void) {
 		guard let url = URL(string: "\(customerAccountsBaseUrl)/account/customer/api/2024-07/graphql") else {
 			return
 		}
@@ -276,12 +349,20 @@ class CustomerAccountClient {
 
 	private func executeRequest(
 		url: URL,
-		headers: [String: String],
-		body: Data?,
-		completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void
-	) {
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
+        headers: [String: String] = [:],
+        method: String = "POST",
+        body: Data? = nil,
+        query: [String: String]? = [:],
+        completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void
+    ) {
+		var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        if query?.isEmpty != true {
+            components.queryItems =  [URLQueryItem]()
+        }
+        query?.forEach { components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value)) }
+
+        var request = URLRequest(url: components.url!)
+		request.httpMethod = method
 		for (key, value) in headers {
 			request.setValue(value, forHTTPHeaderField: key)
 		}
@@ -289,10 +370,33 @@ class CustomerAccountClient {
 
 		let session = URLSession.shared
 		let task = session.dataTask(with: request) { data, response, error in
-			completionHandler(data, response, error)
+            print("Data: \(String(decoding: data ?? Data(), as: UTF8.self)), Response: \(String(describing: response)), Error: \(String(describing: error))")
+            completionHandler(data, response, error)
 		}
 		task.resume()
 	}
+}
+
+class AccessTokenExpirationManager {
+    static let shared = AccessTokenExpirationManager()
+
+    private var accessTokenExpirationMap: [String: Date]
+
+    init() {
+        self.accessTokenExpirationMap = [:]
+    }
+
+    func addAccessToken(accessToken: String, expiresIn: Int) {
+        accessTokenExpirationMap[accessToken] = Date().addingTimeInterval(Double(expiresIn))
+    }
+
+    func isAccessTokenExpired(accessToken: String) -> Bool {
+        return accessTokenExpirationMap[accessToken] != nil && Date() > accessTokenExpirationMap[accessToken]!
+    }
+
+    func getExpirationDate(accessToken: String) -> Date? {
+        return self.accessTokenExpirationMap[accessToken]
+    }
 }
 
 struct AuthData {
@@ -306,7 +410,6 @@ struct CustomerAccountAccessTokenResponse: Codable {
 	let expiresIn: Int
 	let idToken: String
 	let refreshToken: String
-	let scope: String
 	let tokenType: String
 
 	enum CodingKeys: String, CodingKey {
@@ -314,25 +417,22 @@ struct CustomerAccountAccessTokenResponse: Codable {
 		case expiresIn = "expires_in"
 		case idToken = "id_token"
 		case refreshToken = "refresh_token"
-		case scope = "scope"
 		case tokenType = "token_type"
 	}
 }
 
-struct CustomerAccountExchangeTokenResponse: Codable {
-	let accessToken: String
-	let expiresIn: Int
-	let tokenType: String
-	let scope: String
-	let issuedTokenType: String
+struct CustomerAccountRefreshedTokenResponse: Codable {
+    let accessToken: String
+    let expiresIn: Int
+    let refreshToken: String
+    let tokenType: String
 
-	enum CodingKeys: String, CodingKey {
-		case accessToken = "access_token"
-		case expiresIn = "expires_in"
-		case tokenType = "token_type"
-		case scope = "scope"
-		case issuedTokenType = "issued_token_type"
-	}
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case expiresIn = "expires_in"
+        case refreshToken = "refresh_token"
+        case tokenType = "token_type"
+    }
 }
 
 struct MutationRoot: Codable {

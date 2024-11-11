@@ -27,43 +27,117 @@ import WebKit
 class LoginWebViewController: UIViewController, UIAdaptivePresentationControllerDelegate, LoginWebViewDelegate {
 
 	internal var loginWebView: LoginWebView
-	private let authData: AuthData
-	private let redirectUri: String
+    internal var authenticationClient: CustomerAccountClient = CustomerAccountClient.shared
 
 	internal var progressObserver: NSKeyValueObservation?
 
-	public init(authData: AuthData, redirectUri: String) {
-		self.authData = authData
-		self.redirectUri = redirectUri
-
-		let loginView = LoginWebView()
-		loginView.setAuthData(authData: authData, redirectUri: redirectUri)
-		loginView.translatesAutoresizingMaskIntoConstraints = false
-		loginView.scrollView.contentInsetAdjustmentBehavior = .never
-		self.loginWebView = loginView
+	public init() {
+		self.loginWebView = LoginWebView()
 
 		super.init(nibName: nil, bundle: nil)
 
 		title = "Login"
 
-		loginView.viewDelegate = self
+        loginWebView.viewDelegate = self
 	}
 
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
 
+    func login() {
+        guard !authenticationClient.isAuthenticated() else {
+            print("Customer account is already authenticated.")
+            return
+        }
+
+        loginWebView.translatesAutoresizingMaskIntoConstraints = false
+        loginWebView.scrollView.contentInsetAdjustmentBehavior = .never
+
+        guard let authData = authenticationClient.buildAuthData() else {
+            print("No auth data available to build authorization URL")
+            return
+        }
+
+        loginWebView
+            .setAuthData(
+                authData: authData,
+                redirectUri: authenticationClient.getRedirectUri()
+            )
+
+        loginWebView.load(URLRequest(url: authData.authorizationUrl))
+    }
+
+    func refreshToken() {
+        guard authenticationClient.isAuthenticated() else {
+            print("Customer account is not authenticated.")
+            return
+        }
+
+        let refreshToken = authenticationClient.getRefreshToken()
+        guard refreshToken != nil else {
+            print("No refresh token available to build refresh token URL.")
+            return
+        }
+
+        authenticationClient
+            .refreshAccessToken(refreshToken: refreshToken!, callback: { token, error in
+                guard let nonNilToken = token else {
+                    self.loginFailed(error: error ?? "Unknown error")
+                    return
+                }
+                self.loginComplete(token: nonNilToken)
+            })
+    }
+
+    func logout() {
+        guard authenticationClient.isAuthenticated() else {
+            print("Customer account is not authenticated.")
+            return
+        }
+
+        let idToken = authenticationClient.getIdToken()
+        guard idToken != nil else {
+            print("No id token available to build logout URL.")
+            return
+        }
+
+        authenticationClient.logout(
+            idToken: idToken!,
+            callback: { success, error in
+                guard success != nil else {
+                    self.loginFailed(error: error ?? "Unknown error")
+                    return
+                }
+                self.logoutComplete()
+            }
+        )
+    }
+
 	func loginComplete(token: String) {
 		DispatchQueue.main.async {
 			let idToken = CustomerAccountClient.shared.decodedIdToken()
+            let sfApiAccessToken = CustomerAccountClient.shared.getSfApiAccessToken()
+            let accessToken = CustomerAccountClient.shared.getAccessToken()
+            let accessTokenExpiration = AccessTokenExpirationManager.shared.getExpirationDate(accessToken: accessToken!)
 			let email = idToken?["email"] ?? ""
-			let message = "Logged in (or was already logged in) - \(email!)"
+			let message = "Logged in (or was already logged in) - \(email!)\n SFP API Access Token:\(sfApiAccessToken!)\n Expiration Date:\(accessTokenExpiration!)"
 
 			self.showAlert(title: "Login complete", message: message, completion: {
 				self.dismiss(animated: true)
 			})
 		}
 	}
+
+    func logoutComplete() {
+        DispatchQueue.main.async {
+            let message = "Logged out"
+
+            self.showAlert(title: "Logout complete", message: message, completion: {
+                self.dismiss(animated: true)
+            })
+        }
+    }
 
 	func loginFailed(error: String) {
 		DispatchQueue.main.async {
@@ -83,8 +157,6 @@ class LoginWebViewController: UIViewController, UIAdaptivePresentationController
 			loginWebView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 			loginWebView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
 		])
-
-		loginWebView.load(URLRequest(url: authData.authorizationUrl))
 	}
 }
 
