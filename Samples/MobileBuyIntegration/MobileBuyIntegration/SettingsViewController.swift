@@ -29,6 +29,7 @@ import ShopifyCheckoutSheetKit
 struct SettingsView: View {
 	@State private var preloadingEnabled = ShopifyCheckoutSheetKit.configuration.preloading.enabled
 	@State private var useVaultedState = appConfiguration.useVaultedState
+	@State private var useAuthenticatedState = appConfiguration.useAuthenticatedState
 	@State private var logs: [String?] = LogReader.shared.readLogs() ?? []
 	@State private var selectedColorScheme = ShopifyCheckoutSheetKit.configuration.colorScheme
 	@State private var colorScheme: ColorScheme = .light
@@ -44,6 +45,10 @@ struct SettingsView: View {
 					Toggle("Prefill buyer information", isOn: $useVaultedState)
 						.onChange(of: useVaultedState) { newValue in
 							appConfiguration.useVaultedState = newValue
+						}
+					Toggle("Authenticate cart when logged in", isOn: $useAuthenticatedState)
+						.onChange(of: useAuthenticatedState) { newValue in
+							appConfiguration.useAuthenticatedState = newValue
 						}
 				}
 
