@@ -150,9 +150,12 @@ struct CartLines: View {
 			HStack {
 				if let imageUrl = variant?.product.featuredImage?.url {
 					AsyncImage(url: imageUrl) { image in
-						image.image?.resizable().aspectRatio(contentMode: .fit)
+						image.image?
+							.resizable()
+							.aspectRatio(contentMode: .fill)
+							.frame(width: 80, height: 105)
+							.clipped()
 					}
-					.frame(width: 60, height: 120)
 				}
 
 				VStack(alignment: .leading, spacing: 8
@@ -170,6 +173,8 @@ struct CartLines: View {
 					if let price = variant?.price.formattedString() {
 						HStack(spacing: 80) {
 							Text("\(price)")
+								.lineLimit(1)
+								.minimumScaleFactor(0.5)
 								.foregroundColor(.gray)
 
 						HStack(spacing: 20) {
@@ -262,5 +267,6 @@ struct CartViewPreviewContent: View {
 
 	var body: some View {
 		CartView(cartManager: CartManager.shared, checkoutURL: $checkoutURL, isShowingCheckout: $isShowingCheckout)
+			.padding(10)
 	}
 }

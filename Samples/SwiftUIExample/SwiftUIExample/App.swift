@@ -29,6 +29,7 @@ struct SwiftUIExampleApp: App {
 	init() {
 		ShopifyCheckoutSheetKit.configure {
 			$0.preloading.enabled = true
+			$0.logLevel = .all
 		}
 	}
 
@@ -55,7 +56,7 @@ struct RootTabView: View {
 				CartView(cartManager: cartManager, checkoutURL: $checkoutURL, isShowingCheckout: $isShowingCheckout)
 					.navigationTitle("Cart")
 					.navigationBarTitleDisplayMode(.inline)
-					.padding(20)
+					.padding(10)
 					.toolbar {
 						if cartManager.cart?.lines != nil {
 							ToolbarItem(placement: .navigationBarTrailing) {

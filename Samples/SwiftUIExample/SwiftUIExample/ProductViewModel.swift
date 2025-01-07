@@ -179,8 +179,11 @@ extension Storefront.ProductQuery {
 			.title()
 			.description()
 			.vendor()
+			.availableForSale()
 			.featuredImage { $0
-				.url()
+				.url(
+					transform: Storefront.ImageTransformInput(maxWidth: 932)
+				)
 			}
 			.variants(first: 1) { $0
 				.nodes { $0
@@ -216,8 +219,11 @@ extension Storefront.CartQuery {
 							.product { $0
 								.title()
 								.vendor()
+								.availableForSale()
 								.featuredImage { $0
-									.url()
+									.url(
+										transform: Storefront.ImageTransformInput(maxWidth: 120)
+									)
 								}
 							}
 						}
