@@ -45,7 +45,10 @@ struct CatalogView: View {
 	var body: some View {
 		NavigationView {
 			VStack {
-				if let product = product, let price = product.variants.nodes.first?.price.formattedString() {
+				if
+				let product = product,
+				let first = product.variants.nodes.first,
+				let price = first.price.formattedString() {
 					VStack {
 						VStack(alignment: .leading) {
 							AsyncImage(url: product.featuredImage?.url) { image in
@@ -81,6 +84,7 @@ struct CatalogView: View {
 							Text(product.description)
 								.padding(2)
 								.bold()
+								.lineLimit(3)
 								.foregroundColor(.gray)
 						}.padding(.horizontal, 15)
 
@@ -103,15 +107,16 @@ struct CatalogView: View {
 										.foregroundColor(.white)
 										.cornerRadius(10)
 								} else {
-									Text("Add to cart - \(price)")
+									Text(product.availableForSale ? (first.price.amount == 0 ? "Add to cart - Free" : "Add to cart - \(price)") : "Out of stock")
 										.font(.headline)
 										.padding()
 										.frame(maxWidth: 400)
-										.background(Color.blue)
+										.background(product.availableForSale ? Color.blue : Color.gray)
 										.foregroundColor(.white)
 										.cornerRadius(10)
 								}
 							})
+							.disabled(!product.availableForSale)
 							.accessibilityIdentifier("addToCartButton")
 							.sheet(isPresented: $isShowingCart) {
 								NavigationView {
