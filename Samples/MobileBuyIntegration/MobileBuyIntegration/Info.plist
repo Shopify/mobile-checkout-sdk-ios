@@ -27,7 +27,11 @@
 	<key>Phone</key>
 	<string>$(PHONE)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your location may be required to locate pickup points near you when you request this shipping option.</string>
+	<string>Your location is required to locate pickup points near you.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>offsitepayment</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
