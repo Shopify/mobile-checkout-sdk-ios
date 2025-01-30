@@ -34,11 +34,11 @@ class PassKitFactory {
 
         paymentRequest.merchantIdentifier = ApplePayHandler.MerchantId
         paymentRequest.supportedNetworks = ApplePayHandler.SupportedNetworks
-        
+
         paymentRequest.countryCode = ApplePayHandler.CountryCode
         paymentRequest.currencyCode = ApplePayHandler.CurrencyCode
         paymentRequest.merchantCapabilities = .capability3DS
-        
+
         paymentRequest.shippingType = .delivery
         paymentRequest.shippingMethods = createDefaultShippingMethod()
 
@@ -92,7 +92,7 @@ class PassKitFactory {
         #warning("Missing selectedDeliveryOption will throw out of this guard")
         guard
             let selectedDeliveryOption = CartManager.shared.cart?.deliveryGroups
-                .nodes.first?.selectedDeliveryOption,
+            .nodes.first?.selectedDeliveryOption,
             let title = selectedDeliveryOption.title
         else { return [] }
 
@@ -106,7 +106,7 @@ class PassKitFactory {
 
         return [shippingCollection]
     }
-    
+
     public func createShippingMethods(
         firstDeliveryGroup: Storefront.CartDeliveryGroup
     ) -> [PKShippingMethod] {
@@ -127,7 +127,7 @@ class PassKitFactory {
             return shippingMethod
         }
     }
-    
+
     public func createPaymentSummaryItems(
         cart: Storefront.Cart?, shippingMethod: PKShippingMethod?
     ) -> [PKPaymentSummaryItem] {
@@ -180,6 +180,4 @@ class PassKitFactory {
 
         return paymentSummaryItems
     }
-
-
 }

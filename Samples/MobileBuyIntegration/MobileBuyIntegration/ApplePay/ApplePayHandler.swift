@@ -33,9 +33,9 @@ class ApplePayHandler: NSObject {
 
     /**
      * Starts as nil when no payment status has been made
-     * Question: Should be reset to nil when starting a new payment process?
      */
     var paymentStatus: PKPaymentAuthorizationStatus?
+
     /**
      * Instantiated during `startPayment`
      * called at the end of the payment process after PaymentHandler#didAuthorizePayment
@@ -56,6 +56,7 @@ class ApplePayHandler: NSObject {
      * The merchant’s two-letter ISO 3166 country code.
      */
     static let CountryCode = "US"
+    
     /**
      * The three-letter ISO 4217 currency code that determines the currency the payment request uses.
      */
@@ -69,6 +70,9 @@ class ApplePayHandler: NSObject {
      */
     static let MerchantId = "merchant.com.shopify.example.MobileBuyIntegration.ApplePay"
 
+    /**
+     * Opens the ApplePay sheet, populating values from the cart into PassKit representations
+     */
     func startApplePayCheckout(completion: @escaping PaymentCompletionHandler) {
         paymentCompletionHandler = completion
 
