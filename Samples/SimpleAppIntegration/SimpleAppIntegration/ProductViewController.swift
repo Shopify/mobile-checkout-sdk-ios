@@ -66,6 +66,7 @@ class ProductViewController: UIViewController, CheckoutDelegate {
 	private func presentCheckout(url: URL) {
 		ShopifyCheckoutSheetKit.present(checkout: url, from: self, delegate: self)
 	}
+    
 	@IBAction private func reloadProduct() {
 		StorefrontClient.shared.product { [weak self] result in
 			if case .success(let product) = result {

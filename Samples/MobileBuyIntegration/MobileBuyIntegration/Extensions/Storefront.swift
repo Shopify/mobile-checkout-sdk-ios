@@ -23,6 +23,62 @@
 
 import Buy
 
+extension Storefront.CartDeliveryGroupQuery {
+    @discardableResult
+    func deliveryGroupsFragment() -> Storefront.CartDeliveryGroupQuery {
+        id().deliveryOptions {
+            $0.handle()
+                .title()
+                .code()
+                .deliveryMethodType()
+                .description()
+                .estimatedCost {
+                    $0.amount()
+                        .currencyCode()
+                }
+        }.selectedDeliveryOption {
+            $0.description()
+                .title()
+                .handle()
+                .estimatedCost {
+                    $0.amount()
+                        .currencyCode()
+                }
+        }
+    }
+}
+
+extension Storefront.BaseCartLineQuery {
+    @discardableResult
+    func cartLineFragment() -> Storefront.BaseCartLineQuery {
+        id()
+            .quantity()
+            .merchandise {
+                $0.onProductVariant {
+                    $0.id()
+                        .title()
+                        .price {
+                            $0.amount()
+                                .currencyCode()
+                        }
+                        .product {
+                            $0.title()
+                                .vendor()
+                                .featuredImage {
+                                    $0.url()
+                                }
+                        }
+                }
+            }
+            .cost {
+                $0.totalAmount {
+                    $0.amount()
+                        .currencyCode()
+                }
+            }
+    }
+}
+
 extension Storefront.CartQuery {
     @discardableResult
     func cartManagerFragment() -> Storefront.CartQuery {
@@ -31,55 +87,12 @@ extension Storefront.CartQuery {
             .totalQuantity()
             .deliveryGroups(first: 10) {
                 $0.nodes {
-                    $0.id()
-                        .deliveryOptions {
-                            $0.handle()
-                                .title()
-                                .code()
-                                .deliveryMethodType()
-                                .description()
-                                .estimatedCost {
-                                    $0.amount()
-                                        .currencyCode()
-                                }
-                        }.selectedDeliveryOption {
-                            $0.description()
-                                .title()
-                                .handle()
-                                .estimatedCost {
-                                    $0.amount()
-                                        .currencyCode()
-                                }
-                        }
+                    $0.deliveryGroupsFragment()
                 }
             }
             .lines(first: 250) {
                 $0.nodes {
-                    $0.id()
-                        .quantity()
-                        .merchandise {
-                            $0.onProductVariant {
-                                $0.id()
-                                    .title()
-                                    .price {
-                                        $0.amount()
-                                            .currencyCode()
-                                    }
-                                    .product {
-                                        $0.title()
-                                            .vendor()
-                                            .featuredImage {
-                                                $0.url()
-                                            }
-                                    }
-                            }
-                        }
-                        .cost {
-                            $0.totalAmount {
-                                $0.amount()
-                                    .currencyCode()
-                            }
-                        }
+                    $0.cartLineFragment()
                 }
             }
             .totalQuantity()
@@ -109,30 +122,24 @@ extension Storefront.ProductQuery {
             .description()
             .vendor()
             .featuredImage {
-                $0
-                    .url()
+                $0.url()
             }
             .collections(first: 1) {
-                $0
-                    .nodes {
-                        $0
-                            .id()
-                            .title()
-                    }
+                $0.nodes {
+                    $0.id()
+                        .title()
+                }
             }
             .variants(first: 1) {
-                $0
-                    .nodes {
-                        $0
-                            .id()
-                            .title()
-                            .availableForSale()
-                            .price {
-                                $0
-                                    .amount()
-                                    .currencyCode()
-                            }
-                    }
+                $0.nodes {
+                    $0.id()
+                        .title()
+                        .availableForSale()
+                        .price {
+                            $0.amount()
+                                .currencyCode()
+                        }
+                }
             }
     }
 }
