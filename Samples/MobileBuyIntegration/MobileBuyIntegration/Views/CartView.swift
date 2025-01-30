@@ -21,6 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import _PassKit_SwiftUI
 import Buy
 import ShopifyCheckoutSheetKit
 import SwiftUI
@@ -30,6 +31,7 @@ struct CartView: View {
     @State var isBusy: Bool = false
 
     @ObservedObject var cartManager: CartManager = .shared
+    @ObservedObject var config: AppConfiguration = appConfiguration
 
     var body: some View {
         if let lines = cartManager.cart?.lines.nodes {
@@ -42,25 +44,42 @@ struct CartView: View {
                 }
 
                 VStack {
-                    Button(action: presentCheckout, label: {
-                        HStack {
-                            Text("Checkout")
-                                .fontWeight(.bold)
-                            Spacer()
-                            if let amount = cartManager.cart?.cost.totalAmount, let total = amount.formattedString() {
-                                Text(total)
+                    Button(
+                        action: presentCheckout,
+                        label: {
+                            HStack {
+                                Text("Checkout")
                                     .fontWeight(.bold)
+                                Spacer()
+                                if let amount = cartManager.cart?.cost.totalAmount,
+                                   let total = amount.formattedString()
+                                {
+                                    Text(total)
+                                        .fontWeight(.bold)
+                                }
                             }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(isBusy ? Color.gray : Color(ColorPalette.primaryColor))
+                            .cornerRadius(10)
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(isBusy ? Color.gray : Color(ColorPalette.primaryColor))
-                        .cornerRadius(10)
-                    })
+                    )
                     .disabled(isBusy)
                     .foregroundColor(.white)
                     .accessibilityIdentifier("checkoutButton")
                     .padding(.horizontal, 20)
+
+                    if config.applePayEnabled {
+                        PayWithApplePayButton(
+                            .checkout,
+                            action: handleApplePayPress,
+                            fallback: { Text("Apple Pay not available") }
+                        )
+                        .disabled(isBusy)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .padding(.horizontal, 20)
+                        .cornerRadius(10)
+                    }
                 }
                 .padding(.bottom, 20)
             }
@@ -82,6 +101,10 @@ struct CartView: View {
         }
 
         CheckoutController.shared?.present(checkout: url)
+    }
+
+    private func handleApplePayPress() {
+        CheckoutController.shared?.payWithApplePay()
     }
 }
 
@@ -167,12 +190,13 @@ struct CartLines: View {
                                     /// Invalidate the cart cache to ensure the correct item quantity is reflected on checkout
                                     ShopifyCheckoutSheetKit.invalidate()
 
-                                    CartManager.shared.updateQuantity(variant: node.id, quantity: node.quantity - 1, completionHandler: { cart in
+                                    _Concurrency.Task {
+                                        let cart = try await CartManager.shared.performCartLinesUpdate(id: node.id, quantity: node.quantity - 1)
                                         CartManager.shared.cart = cart
                                         updating = nil
 
                                         CartManager.shared.preloadCheckout()
-                                    })
+                                    }
                                 }, label: {
                                     Image(systemName: "minus")
                                         .font(.system(size: 12))
@@ -191,32 +215,37 @@ struct CartLines: View {
                                     }
                                 }.frame(width: 20)
 
-                                Button(action: {
-                                    /// Prevent multiple simulataneous calls
-                                    guard updating != node.id else {
-                                        return
-                                    }
-
-                                    updating = node.id
-
-                                    /// Invalidate the cart cache to ensure the correct item quantity is reflected on checkout
-                                    ShopifyCheckoutSheetKit.invalidate()
-
-                                    CartManager.shared.updateQuantity(variant: node.id, quantity: node.quantity + 1, completionHandler: { cart in
-                                        CartManager.shared.cart = cart
-                                        updating = nil
-
-                                        if let url = cart?.checkoutUrl {
-                                            ShopifyCheckoutSheetKit.preload(checkout: url)
+                                Button(
+                                    action: {
+                                        /// Prevent multiple simulataneous calls
+                                        guard updating != node.id else {
+                                            return
                                         }
-                                    })
-                                }, label: {
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 12))
-                                        .frame(width: 32, height: 32)
-                                        .background(Color.gray.opacity(0.1))
-                                        .clipShape(Circle())
-                                })
+
+                                        updating = node.id
+
+                                        /// Invalidate the cart cache to ensure the correct item quantity is reflected on checkout
+                                        ShopifyCheckoutSheetKit.invalidate()
+
+                                        _Concurrency.Task {
+                                            let cart = try await CartManager.shared.performCartLinesUpdate(
+                                                id: node.id,
+                                                quantity: node.quantity + 1
+                                            )
+                                            CartManager.shared.cart = cart
+                                            updating = nil
+
+                                            ShopifyCheckoutSheetKit.preload(checkout: cart.checkoutUrl)
+                                        }
+                                    },
+                                    label: {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 12))
+                                            .frame(width: 32, height: 32)
+                                            .background(Color.gray.opacity(0.1))
+                                            .clipShape(Circle())
+                                    }
+                                )
                             }
                             .padding(.trailing, 10)
                         }

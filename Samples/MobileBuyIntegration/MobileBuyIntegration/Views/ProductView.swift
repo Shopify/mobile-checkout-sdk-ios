@@ -50,7 +50,6 @@ struct ProductView: View {
                     ZStack {
                         Rectangle()
                             .fill(Color.gray.opacity(0.2))
-                            .frame(height: 400)
 
                         AsyncImage(url: imageURL) { phase in
                             switch phase {
@@ -77,8 +76,10 @@ struct ProductView: View {
                                 EmptyView()
                             }
                         }
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: UIScreen.main.bounds.width)
+                        .clipped()
                     }
-                    .frame(height: 400)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -126,17 +127,20 @@ struct ProductView: View {
             }
         }
         .navigationTitle(product.collections.nodes.first?.title ?? product.title)
+        .frame(idealWidth: 200)
     }
 
     // MARK: Methods
 
     private func addToCart() {
-        guard let variant = product.variants.nodes.first else { return }
+        _Concurrency.Task {
+            guard let variant = product.variants.nodes.first else { return }
 
-        loading = true
-        let start = Date()
+            loading = true
+            let start = Date()
 
-        CartManager.shared.addItem(variant: variant.id) {
+            _ = try await CartManager.shared.performCartLinesAdd(variant: variant.id)
+
             let diff = Date().timeIntervalSince(start)
             let message = "Added item to cart in \(String(format: "%.0f", diff * 1000))ms"
             ShopifyCheckoutSheetKit.configuration.logger.log(message)
@@ -178,33 +182,7 @@ class ProductCache: ObservableObject {
         let context = Storefront.InContextDirective(country: Storefront.CountryCode.inferRegion())
         let query = Storefront.buildQuery(inContext: context) { $0
             .products(first: 1, query: handle) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                    .handle()
-                    .description()
-                    .vendor()
-                    .featuredImage { $0
-                        .url()
-                    }
-                    .collections(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                        }
-                    }
-                    .variants(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                            .availableForSale()
-                            .price { $0
-                                .amount()
-                                .currencyCode()
-                            }
-                        }
-                    }
-                }
+                .nodes { $0.productFragment() }
             }
         }
 
@@ -221,33 +199,7 @@ class ProductCache: ObservableObject {
         let context = Storefront.InContextDirective(country: Storefront.CountryCode.inferRegion())
         let query = Storefront.buildQuery(inContext: context) { $0
             .products(first: limit) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                    .handle()
-                    .description()
-                    .vendor()
-                    .featuredImage { $0
-                        .url()
-                    }
-                    .collections(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                        }
-                    }
-                    .variants(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                            .availableForSale()
-                            .price { $0
-                                .amount()
-                                .currencyCode()
-                            }
-                        }
-                    }
-                }
+                .nodes { $0.productFragment() }
             }
         }
 

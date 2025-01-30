@@ -21,46 +21,22 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
-import ShopifyCheckoutSheetKit
+import PassKit
 
-public final class AppConfiguration: ObservableObject {
-    public var storefrontDomain: String = InfoDictionary.shared.domain
-
-    @Published public var universalLinks = UniversalLinks()
-
-    /// Prefill buyer information
-    @Published public var useVaultedState: Bool = false
-
-    /// Logger to retain Web Pixel events
-    let webPixelsLogger = FileLogger("analytics.txt")
-
-    // Displays the Checkout with ApplePay button
-    @Published var applePayEnabled: Bool = true
+struct PaymentData: Codable {
+    let data, signature: String
+    let header: Header
+    let version: String
 }
 
-public var appConfiguration = AppConfiguration() {
-    didSet {
-        CartManager.shared.resetCart()
-    }
+struct Header: Codable {
+    let transactionId: String
+    let ephemeralPublicKey, publicKeyHash: String
 }
 
-public struct UniversalLinks {
-    public var checkout: Bool = true
-    public var cart: Bool = true
-    public var products: Bool = true
-
-    public var handleAllURLsInApp: Bool = true {
-        didSet {
-            if handleAllURLsInApp {
-                enableAllURLs()
-            }
-        }
-    }
-
-    private mutating func enableAllURLs() {
-        checkout = true
-        products = true
-        cart = true
-    }
+func decodePaymentData(payment: PKPayment) -> PaymentData? {
+    return try? JSONDecoder().decode(
+        PaymentData.self,
+        from: payment.token.paymentData
+    )
 }

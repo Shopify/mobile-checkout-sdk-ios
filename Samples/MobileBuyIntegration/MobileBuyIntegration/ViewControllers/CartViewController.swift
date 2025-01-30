@@ -230,15 +230,15 @@ class CartViewController: UIViewController, UITableViewDelegate, UITableViewData
             ShopifyCheckoutSheetKit.invalidate()
 
             /// Update cart quantities
-            CartManager.shared.updateQuantity(variant: node.id, quantity: quantity, completionHandler: { cart in
+            _Concurrency.Task {
+                let cart = try await CartManager.shared.performCartLinesUpdate(id: node.id, quantity: quantity)
+
                 cell.showLoading(false)
                 self.checkoutButton.isEnabled = true
-                cell.quantityLabel.text = "\(cart?.lines.nodes[indexPath.item].quantity ?? 0)"
+                cell.quantityLabel.text = "\(cart.lines.nodes[indexPath.item].quantity)"
 
-                if let url = cart?.checkoutUrl {
-                    ShopifyCheckoutSheetKit.preload(checkout: url)
-                }
-            })
+                ShopifyCheckoutSheetKit.preload(checkout: cart.checkoutUrl)
+            }
         }
         return cell
     }

@@ -52,6 +52,7 @@ struct SettingsView: View {
 
                     Text("By default, the app will only handle the selections above and route everything else to Safari. Enabling the \"Handle all Universal Links\" setting will route all Universal Links to this app.")
                         .font(.caption)
+                    Toggle("Show Checkout with ApplePay button", isOn: $config.applePayEnabled)
                 }
 
                 Section(header: Text("Theme")) {
@@ -116,15 +117,7 @@ struct SettingsView: View {
     }
 
     private func currentVersion() -> String {
-        guard
-            let info = Bundle.main.infoDictionary,
-            let version = info["CFBundleShortVersionString"] as? String,
-            let buildNumber = info["CFBundleVersion"] as? String
-        else {
-            return "--"
-        }
-
-        return "\(version) (\(buildNumber))"
+        return "\(InfoDictionary.shared.version) (\(InfoDictionary.shared.buildNumber))"
     }
 }
 

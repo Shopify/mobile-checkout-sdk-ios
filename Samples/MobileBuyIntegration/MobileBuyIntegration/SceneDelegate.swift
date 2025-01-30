@@ -39,7 +39,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var cancellables: Set<AnyCancellable> = []
 
     let cartController = UIHostingController(rootView: CartView())
-    let productGridController = UIHostingController(rootView: ProductGrid())
+    let productGridController = UIHostingController(rootView: ProductGridView())
     let productGalleryController = UIHostingController(rootView: ProductGalleryView())
     let settingsController = UIHostingController(rootView: SettingsView())
 
@@ -132,7 +132,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         CartManager.shared.$cart
             .sink { cart in
                 if let cart = cart, cart.lines.nodes.count > 0 {
-                    self.cartController.tabBarItem.badgeValue = "\(cart.totalQuantity)"
+                    DispatchQueue.main.async {
+                        self.cartController.tabBarItem.badgeValue = "\(cart.totalQuantity)"
+                    }
                 } else {
                     self.cartController.tabBarItem.badgeValue = nil
                 }

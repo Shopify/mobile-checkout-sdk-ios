@@ -28,6 +28,7 @@ import UIKit
 class CheckoutController: UIViewController {
     var window: UIWindow?
     var root: UIViewController?
+    let paymentHandler = ApplePayHandler()
 
     init(window: UIWindow?) {
         self.window = window
@@ -51,11 +52,26 @@ class CheckoutController: UIViewController {
     public func preload() {
         CartManager.shared.preloadCheckout()
     }
+
+    public func payWithApplePay() {
+        paymentHandler.startApplePayCheckout { success in
+            print("success: \(success)")
+            if !success, let checkoutUrl = CartManager.shared.cart?.checkoutUrl {
+                // If payment fails, decelerate into CSK checkout to complete payment
+                self.present(checkout: checkoutUrl)
+            }
+
+            guard let redirectUrl = CartManager.shared.redirectUrl else { return }
+            // Present thank you page
+            self.present(checkout: redirectUrl)
+        }
+    }
 }
 
 extension CheckoutController: CheckoutDelegate {
     func checkoutDidComplete(event: CheckoutCompletedEvent) {
-        OSLogger.shared.debug("[CheckoutDelegate] Checkout completed. Order ID: \(event.orderDetails.id)")
+        OSLogger.shared.debug(
+            "[CheckoutDelegate] Checkout completed. Order ID: \(event.orderDetails.id)")
         CartManager.shared.resetCart()
     }
 
