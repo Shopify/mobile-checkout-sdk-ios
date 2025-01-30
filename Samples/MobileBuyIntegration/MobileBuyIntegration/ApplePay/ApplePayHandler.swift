@@ -56,7 +56,7 @@ class ApplePayHandler: NSObject {
      * The merchant’s two-letter ISO 3166 country code.
      */
     static let CountryCode = "US"
-    
+
     /**
      * The three-letter ISO 4217 currency code that determines the currency the payment request uses.
      */
@@ -240,11 +240,12 @@ extension ApplePayHandler: PKPaymentAuthorizationControllerDelegate {
 
                 guard let paymentStatus = self.paymentStatus?.rawValue as? NSNumber else {
                     return print(
-                        "Unknown payment status \(String(describing: CartManager.shared.cart))"
+                        "Unknown payment status: \(String(describing: self.paymentStatus?.rawValue))"
                     )
                 }
-
-                self.paymentCompletionHandler?(Bool(truncating: paymentStatus))
+                print("paymentStatus \(paymentStatus)")
+                let isSuccess = paymentStatus == 0
+                self.paymentCompletionHandler?(isSuccess)
             }
         }
     }

@@ -361,7 +361,7 @@ class CartManager: ObservableObject {
         let mutation = Storefront.buildMutation(inContext: CartManager.ContextDirective) {
             $0.cartSubmitForCompletion(cartId: cartId, attemptToken: UUID().uuidString) {
                 $0.result {
-                    $0.onSubmitSuccess { $0.attemptId() }
+                    $0.onSubmitSuccess { $0.redirectUrl() }
                         .onSubmitFailed { $0.checkoutUrl() }
                         .onSubmitAlreadyAccepted { $0.attemptId() }
                         .onSubmitThrottled { $0.pollAfter() }

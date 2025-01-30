@@ -55,12 +55,18 @@ class CheckoutController: UIViewController {
 
     public func payWithApplePay() {
         paymentHandler.startApplePayCheckout { success in
+            print("success: \(success)")
             if !success, let checkoutUrl = CartManager.shared.cart?.checkoutUrl {
-                ShopifyCheckoutSheetKit.present(checkout: checkoutUrl, from: self)
+                print("checkoutUrl: \(checkoutUrl)")
+                self.present(checkout: checkoutUrl)
             }
 
-            guard let redirectUrl = CartManager.shared.cart?.checkoutUrl else { return }
-            ShopifyCheckoutSheetKit.present(checkout: redirectUrl, from: self)
+            guard let redirectUrl = CartManager.shared.redirectUrl else {
+                print("No redirectURL")
+                return
+            }
+            print("redirectUrl : \(redirectUrl)")
+            self.present(checkout: redirectUrl)
         }
     }
 }
