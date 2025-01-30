@@ -37,7 +37,7 @@ class ApplePayHandler: NSObject {
     var paymentStatus: PKPaymentAuthorizationStatus?
 
     /**
-     * Instantiated during `startPayment`
+     * Instantiated during `startApplePayCheckout`
      * called at the end of the payment process after PaymentHandler#didAuthorizePayment
      */
     var paymentCompletionHandler: PaymentCompletionHandler?

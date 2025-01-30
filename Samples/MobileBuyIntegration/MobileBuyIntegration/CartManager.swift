@@ -85,12 +85,15 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartLinesAdd?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
+
             DispatchQueue.main.async {
                 self.cart = cart
             }
+
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartLinesAdd", message: "\(error)")
@@ -116,10 +119,15 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartLinesUpdate?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
-            self.cart = cart
+
+            DispatchQueue.main.async {
+                self.cart = cart
+            }
+
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartLinesUpdate", message: "\(error)")
@@ -130,6 +138,10 @@ class CartManager: ObservableObject {
         contact: PKContact,
         partial _: Bool
     ) async throws -> Storefront.Cart {
+        guard let cartId = cart?.id else {
+            throw Errors.invariant(message: "cart.id should be defined")
+        }
+
         guard let address = contact.postalAddress else {
             throw Errors.invariant(message: "contact.postalAddress is nil")
         }
@@ -138,10 +150,6 @@ class CartManager: ObservableObject {
             contact: contact,
             address: address
         )
-
-        guard let cartId = cart?.id else {
-            throw Errors.invariant(message: "cart.id must not be nil")
-        }
 
         let deliveryAddressPreferencesInput = Input(
             orNull: [
@@ -168,38 +176,26 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartBuyerIdentityUpdate?.cart else {
-                throw Errors.apiErrors(
-                    requestName: "cartBuyerIdentityUpdate",
-                    message: "returned cart is nil"
-                )
+                throw Errors.invariant(message: "returned cart is nil")
             }
+
             DispatchQueue.main.async {
                 self.cart = cart
             }
+
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartBuyerIdentityUpdate", message: "\(error)")
         }
     }
 
-    // TODO: Move this to a DI param for CartManager - Cart shouldn't know about vaulted
-    private func getCountryCode() -> Storefront.CountryCode {
-        if appConfiguration.useVaultedState {
-            let code = Storefront.CountryCode(
-                rawValue: vaultedContactInfo.country
-            )
-            return code ?? .ca
-        }
-
-        return Storefront.CountryCode.inferRegion()
-    }
-
     private func performCartCreate(items: [GraphQL.ID] = []) async throws -> Storefront.Cart {
         let input =
             appConfiguration.useVaultedState
-                ? StorefrontInputFactory.shared.createVaultedCartInput(items)
-                : StorefrontInputFactory.shared.createDefaultCartInput(items)
+            ? StorefrontInputFactory.shared.createVaultedCartInput(items)
+            : StorefrontInputFactory.shared.createDefaultCartInput(items)
 
         let mutation = Storefront.buildMutation(inContext: CartManager.ContextDirective) {
             $0.cartCreate(input: input) {
@@ -209,10 +205,15 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartCreate?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
-            self.cart = cart
+
+            DispatchQueue.main.async {
+                self.cart = cart
+            }
+
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartCreate", message: "\(error)")
@@ -222,11 +223,12 @@ class CartManager: ObservableObject {
     func performCartSelectedDeliveryOptionsUpdate(deliveryOptionHandle: String) async throws
         -> Storefront.Cart
     {
-        guard let deliveryGroupId = cart?.deliveryGroups.nodes.first?.id else {
-            throw Errors.invariant(message: "No deliveryGroups")
-        }
         guard let cartId = cart?.id else {
-            throw Errors.invariant(message: "cart is nil")
+            throw Errors.invariant(message: "cart.id should be defined")
+        }
+
+        guard let deliveryGroupId = cart?.deliveryGroups.nodes.first?.id else {
+            throw Errors.invariant(message: "deliveryGroups.length should be greater than zero")
         }
 
         let cartSelectedDeliveryOptionInput =
@@ -251,6 +253,7 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartSelectedDeliveryOptionsUpdate?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
@@ -269,10 +272,10 @@ class CartManager: ObservableObject {
     }
 
     func performCartPaymentUpdate(
-        payment: PKPayment // REFACTOR: this method should just receive the decoded payment token
+        payment: PKPayment  // REFACTOR: this method should just receive the decoded payment token
     ) async throws -> Storefront.Cart {
         guard let cartId = cart?.id else {
-            throw Errors.invariant(message: "cartId is nil")
+            throw Errors.invariant(message: "cart.id should be defined")
         }
 
         guard
@@ -306,9 +309,15 @@ class CartManager: ObservableObject {
 
         do {
             let response = try await client.executeAsync(mutation: mutation)
+            
             guard let cart = response.cartPaymentUpdate?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
+
+            DispatchQueue.main.async {
+                self.cart = cart
+            }
+
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartPaymentUpdate", message: "\(error)")
@@ -317,7 +326,7 @@ class CartManager: ObservableObject {
 
     func performCartPrepareForCompletion() async throws -> Storefront.Cart {
         guard let cartId = cart?.id else {
-            throw Errors.invariant(message: "cartId is nil")
+            throw Errors.invariant(message: "cart.id should be defined")
         }
 
         let mutation = Storefront.buildMutation(
@@ -336,26 +345,31 @@ class CartManager: ObservableObject {
             }
         }
 
-        let response = try await client.executeAsync(mutation: mutation)
+        do {
+            let response = try await client.executeAsync(mutation: mutation)
 
-        if let result = response.cartPrepareForCompletion?.result as? Storefront.CartStatusReady,
-           let cart = result.cart
-        {
+            guard
+                let result = response.cartPrepareForCompletion?.result
+                    as? Storefront.CartStatusReady,
+                let cart = result.cart
+            else {
+                throw Errors.invariant(
+                    message: "CartPrepareForCompletionResult is not CartStatusReady")
+            }
+
             DispatchQueue.main.async {
                 self.cart = cart
             }
+
             return cart
-        } else {
-            throw Errors.apiErrors(
-                requestName: "cartPrepareForCompletion",
-                message: ""
-            )
+        } catch {
+            throw Errors.apiErrors(requestName: "cartSubmitForCompletion", message: "\(error)")
         }
     }
 
     func performCartSubmitForCompletion() async throws -> Storefront.SubmitSuccess {
         guard let cartId = cart?.id else {
-            fatalError("[invariant_violation][submitForCompletion]: cart id is null")
+            throw Errors.invariant(message: "cart.id should be defined")
         }
 
         let mutation = Storefront.buildMutation(inContext: CartManager.ContextDirective) {
@@ -370,23 +384,22 @@ class CartManager: ObservableObject {
         }
 
         do {
-            let result = try await client.executeAsync(mutation: mutation)
+            let response = try await client.executeAsync(mutation: mutation)
+            
             guard
-                let submissionResult = result.cartSubmitForCompletion?.result
-                as? Storefront.SubmitSuccess
+                let submissionResult = response.cartSubmitForCompletion?.result
+                    as? Storefront.SubmitSuccess
             else {
-                throw Errors.apiErrors(
-                    requestName: "cartSubmitForCompletion",
-                    message: "No result"
-                )
+                throw Errors.invariant(message: "submit result is not of type SubmitSuccess")
             }
+
             DispatchQueue.main.async {
                 self.cart = nil
             }
+
             return submissionResult
         } catch {
-            print("[CartManager][submitForCompletion] error \(error)")
-            throw error
+            throw Errors.apiErrors(requestName: "cartSubmitForCompletion", message: "\(error)")
         }
     }
 
@@ -399,7 +412,7 @@ class CartManager: ObservableObject {
 extension CartManager {
     enum Errors: LocalizedError {
         case missingPostalAddress, invalidPaymentData,
-             invalidBillingAddress
+            invalidBillingAddress
         case apiErrors(requestName: String, message: String)
         case invariant(message: String)
 

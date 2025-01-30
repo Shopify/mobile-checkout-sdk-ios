@@ -57,15 +57,12 @@ class CheckoutController: UIViewController {
         paymentHandler.startApplePayCheckout { success in
             print("success: \(success)")
             if !success, let checkoutUrl = CartManager.shared.cart?.checkoutUrl {
-                print("checkoutUrl: \(checkoutUrl)")
+                // If payment fails, decelerate into CSK checkout to complete payment
                 self.present(checkout: checkoutUrl)
             }
 
-            guard let redirectUrl = CartManager.shared.redirectUrl else {
-                print("No redirectURL")
-                return
-            }
-            print("redirectUrl : \(redirectUrl)")
+            guard let redirectUrl = CartManager.shared.redirectUrl else { return }
+            // Present thank you page
             self.present(checkout: redirectUrl)
         }
     }
