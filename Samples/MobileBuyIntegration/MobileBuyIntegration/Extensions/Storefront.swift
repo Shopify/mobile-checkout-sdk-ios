@@ -43,9 +43,13 @@ extension Storefront.CartQuery {
                                         .currencyCode()
                                 }
                         }.selectedDeliveryOption {
-                            $0.title().handle().estimatedCost {
-                                $0.amount().currencyCode()
-                            }
+                            $0.description()
+                                .title()
+                                .handle()
+                                .estimatedCost {
+                                    $0.amount()
+                                        .currencyCode()
+                                }
                         }
                 }
             }
@@ -104,25 +108,31 @@ extension Storefront.ProductQuery {
             .handle()
             .description()
             .vendor()
-            .featuredImage { $0
-                .url()
+            .featuredImage {
+                $0
+                    .url()
             }
-            .collections(first: 1) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                }
-            }
-            .variants(first: 1) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                    .availableForSale()
-                    .price { $0
-                        .amount()
-                        .currencyCode()
+            .collections(first: 1) {
+                $0
+                    .nodes {
+                        $0
+                            .id()
+                            .title()
                     }
-                }
+            }
+            .variants(first: 1) {
+                $0
+                    .nodes {
+                        $0
+                            .id()
+                            .title()
+                            .availableForSale()
+                            .price {
+                                $0
+                                    .amount()
+                                    .currencyCode()
+                            }
+                    }
             }
     }
 }
