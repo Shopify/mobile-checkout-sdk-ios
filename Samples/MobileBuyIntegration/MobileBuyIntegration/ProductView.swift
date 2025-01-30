@@ -182,33 +182,7 @@ class ProductCache: ObservableObject {
         let context = Storefront.InContextDirective(country: Storefront.CountryCode.inferRegion())
         let query = Storefront.buildQuery(inContext: context) { $0
             .products(first: 1, query: handle) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                    .handle()
-                    .description()
-                    .vendor()
-                    .featuredImage { $0
-                        .url()
-                    }
-                    .collections(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                        }
-                    }
-                    .variants(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                            .availableForSale()
-                            .price { $0
-                                .amount()
-                                .currencyCode()
-                            }
-                        }
-                    }
-                }
+                .nodes { $0.productFragment() }
             }
         }
 
@@ -225,33 +199,7 @@ class ProductCache: ObservableObject {
         let context = Storefront.InContextDirective(country: Storefront.CountryCode.inferRegion())
         let query = Storefront.buildQuery(inContext: context) { $0
             .products(first: limit) { $0
-                .nodes { $0
-                    .id()
-                    .title()
-                    .handle()
-                    .description()
-                    .vendor()
-                    .featuredImage { $0
-                        .url()
-                    }
-                    .collections(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                        }
-                    }
-                    .variants(first: 1) { $0
-                        .nodes { $0
-                            .id()
-                            .title()
-                            .availableForSale()
-                            .price { $0
-                                .amount()
-                                .currencyCode()
-                            }
-                        }
-                    }
-                }
+                .nodes { $0.productFragment() }
             }
         }
 

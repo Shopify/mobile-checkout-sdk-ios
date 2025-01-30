@@ -95,3 +95,34 @@ extension Storefront.CartQuery {
             }
     }
 }
+
+extension Storefront.ProductQuery {
+    @discardableResult
+    func productFragment() -> Storefront.ProductQuery {
+        id()
+            .title()
+            .handle()
+            .description()
+            .vendor()
+            .featuredImage { $0
+                .url()
+            }
+            .collections(first: 1) { $0
+                .nodes { $0
+                    .id()
+                    .title()
+                }
+            }
+            .variants(first: 1) { $0
+                .nodes { $0
+                    .id()
+                    .title()
+                    .availableForSale()
+                    .price { $0
+                        .amount()
+                        .currencyCode()
+                    }
+                }
+            }
+    }
+}
