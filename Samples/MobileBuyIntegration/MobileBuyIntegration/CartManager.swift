@@ -210,6 +210,7 @@ class CartManager: ObservableObject {
             guard let cart = response.cartCreate?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
+            self.cart = cart
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartCreate", message: "\(error)")
@@ -386,7 +387,7 @@ class CartManager: ObservableObject {
             throw error
         }
     }
-    
+
     func resetCart() {
         cart = nil
         isDirty = false
