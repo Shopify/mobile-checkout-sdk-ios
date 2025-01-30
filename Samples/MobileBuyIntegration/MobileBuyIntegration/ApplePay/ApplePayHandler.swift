@@ -1,7 +1,7 @@
 /*
  MIT License
 
- Copyright 2025 - Present, Shopify Inc.
+ Copyright 2023 - Present, Shopify Inc.
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
