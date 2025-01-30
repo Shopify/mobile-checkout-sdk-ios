@@ -88,7 +88,9 @@ class CartManager: ObservableObject {
             guard let cart = response.cartLinesAdd?.cart else {
                 throw Errors.invariant(message: "cart returned nil")
             }
-            self.cart = cart
+            DispatchQueue.main.async {
+                self.cart = cart
+            }
             return cart
         } catch {
             throw Errors.apiErrors(requestName: "cartLinesAdd", message: "\(error)")

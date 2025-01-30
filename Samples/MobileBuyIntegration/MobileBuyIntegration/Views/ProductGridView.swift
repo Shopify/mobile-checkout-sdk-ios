@@ -24,7 +24,7 @@
 import Buy
 import SwiftUI
 
-struct ProductGrid: View {
+struct ProductGridView: View {
     @StateObject private var productCache = ProductCache.shared
     @State private var selectedProduct: Storefront.Product?
     @State private var showProductSheet = false
@@ -146,6 +146,6 @@ struct ProductGridItem: View {
 
 struct ProductGrid_Previews: PreviewProvider {
     static var previews: some View {
-        ProductGrid()
+        ProductGridView()
     }
 }
