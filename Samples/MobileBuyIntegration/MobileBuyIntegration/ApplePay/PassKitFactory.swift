@@ -11,18 +11,18 @@ import PassKit
 class PassKitFactory {
     static let shared = PassKitFactory()
 
-    public func createPaymentRequest(paymentSummaryItems: [PKPaymentSummaryItem])
-        -> PKPaymentRequest
-    {
+    public func createPaymentRequest(
+        paymentSummaryItems: [PKPaymentSummaryItem]
+    ) -> PKPaymentRequest {
         let paymentRequest = PKPaymentRequest()
 
         paymentRequest.merchantIdentifier = ApplePayHandler.MerchantId
         paymentRequest.supportedNetworks = ApplePayHandler.SupportedNetworks
-
+        
         paymentRequest.countryCode = ApplePayHandler.CountryCode
         paymentRequest.currencyCode = ApplePayHandler.CurrencyCode
         paymentRequest.merchantCapabilities = .capability3DS
-
+        
         paymentRequest.shippingType = .delivery
         paymentRequest.shippingMethods = createDefaultShippingMethod()
 
@@ -76,7 +76,7 @@ class PassKitFactory {
         #warning("Missing selectedDeliveryOption will throw out of this guard")
         guard
             let selectedDeliveryOption = CartManager.shared.cart?.deliveryGroups
-            .nodes.first?.selectedDeliveryOption,
+                .nodes.first?.selectedDeliveryOption,
             let title = selectedDeliveryOption.title
         else { return [] }
 
@@ -90,10 +90,10 @@ class PassKitFactory {
 
         return [shippingCollection]
     }
-
-    public func createShippingMethods(firstDeliveryGroup: Storefront.CartDeliveryGroup)
-        -> [PKShippingMethod]
-    {
+    
+    public func createShippingMethods(
+        firstDeliveryGroup: Storefront.CartDeliveryGroup
+    ) -> [PKShippingMethod] {
         return firstDeliveryGroup.deliveryOptions.compactMap {
             guard let title = $0.title, let description = $0.description else {
                 print("Invalid deliveryOption to map shipping method")
@@ -111,10 +111,10 @@ class PassKitFactory {
             return shippingMethod
         }
     }
-
-    public func createPaymentSummaryItems(cart: Storefront.Cart?, shippingMethod: PKShippingMethod?)
-        -> [PKPaymentSummaryItem]
-    {
+    
+    public func createPaymentSummaryItems(
+        cart: Storefront.Cart?, shippingMethod: PKShippingMethod?
+    ) -> [PKPaymentSummaryItem] {
         guard let cart, !cart.lines.nodes.isEmpty else {
             return []
         }
@@ -164,4 +164,6 @@ class PassKitFactory {
 
         return paymentSummaryItems
     }
+
+
 }

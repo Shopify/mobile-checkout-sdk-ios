@@ -69,7 +69,7 @@ struct CartView: View {
                     .accessibilityIdentifier("checkoutButton")
                     .padding(.horizontal, 20)
 
-                    if config.ApplePayEnabled {
+                    if config.applePayEnabled {
                         PayWithApplePayButton(
                             .checkout,
                             action: handleApplePayPress,

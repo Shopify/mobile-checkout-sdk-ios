@@ -190,9 +190,9 @@ class StorefrontInputFactory {
         )
     }
 
-    public func createMailingAddressInput(contact: PKContact, address: CNPostalAddress)
-        -> Storefront.MailingAddressInput
-    {
+    public func createMailingAddressInput(
+        contact: PKContact, address: CNPostalAddress
+    ) -> Storefront.MailingAddressInput {
         return Storefront.MailingAddressInput.create(
             address1: Input(orNull: address.street),
             address2: Input(orNull: address.subLocality),

@@ -35,7 +35,7 @@ class ApplePayHandler: NSObject {
      * Starts as nil when no payment status has been made
      * Question: Should be reset to nil when starting a new payment process?
      */
-    var paymentStatus: PKPaymentAuthorizationStatus? = nil
+    var paymentStatus: PKPaymentAuthorizationStatus?
     /**
      * Instantiated during `startPayment`
      * called at the end of the payment process after PaymentHandler#didAuthorizePayment

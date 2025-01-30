@@ -52,7 +52,7 @@ struct SettingsView: View {
 
                     Text("By default, the app will only handle the selections above and route everything else to Safari. Enabling the \"Handle all Universal Links\" setting will route all Universal Links to this app.")
                         .font(.caption)
-                    Toggle("Show Checkout with ApplePay button", isOn: $config.ApplePayEnabled)
+                    Toggle("Show Checkout with ApplePay button", isOn: $config.applePayEnabled)
                 }
 
                 Section(header: Text("Theme")) {
