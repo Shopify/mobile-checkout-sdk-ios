@@ -21,7 +21,6 @@
 		4EBBA7B02A5F222F00193E19 /* MoneyV2+Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EBBA7AF2A5F222F00193E19 /* MoneyV2+Format.swift */; };
 		4EF54F242A6F456B00F5E407 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF54F232A6F456B00F5E407 /* CartManager.swift */; };
 		4EF54F272A6F4C4F00F5E407 /* CartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF54F262A6F4C4F00F5E407 /* CartViewController.swift */; };
-		6A0FA77E2CE4D7F7003070F8 /* MobileBuyIntegration.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 6AE865492CE3BB6500A4971C /* MobileBuyIntegration.entitlements */; };
 		6A257A132AFBA78500610DA5 /* LogReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A257A122AFBA78500610DA5 /* LogReader.swift */; };
 		6A257A152AFBB06300610DA5 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A257A142AFBB06300610DA5 /* Logger.swift */; };
 		6A2E77BE2CE606490067062D /* ProductGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A2E77BD2CE606400067062D /* ProductGridView.swift */; };
@@ -66,7 +65,6 @@
 		6A3467322B600E64007314A8 /* LogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsView.swift; sourceTree = "<group>"; };
 		6A3D7ADB2B8E01460010EB27 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6A774DD02B58023400C8EF7E /* CountryCode+inferRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CountryCode+inferRegion.swift"; sourceTree = "<group>"; };
-		6AE865492CE3BB6500A4971C /* MobileBuyIntegration.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MobileBuyIntegration.entitlements; sourceTree = "<group>"; };
 		86250DE32AD5521C002E45C2 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		CB05E6BC2D493B8B00466376 /* ApplePayHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayHandler.swift; sourceTree = "<group>"; };
 		CB05E6BE2D4951D700466376 /* InfoDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoDictionary.swift; sourceTree = "<group>"; };
@@ -123,7 +121,6 @@
 				4EBBA7732A5F0CE200193E19 /* Assets.xcassets */,
 				4EBBA7752A5F0CE200193E19 /* LaunchScreen.storyboard */,
 				4EBBA7782A5F0CE200193E19 /* Info.plist */,
-				6AE865492CE3BB6500A4971C /* MobileBuyIntegration.entitlements */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -221,6 +218,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4EBBA77B2A5F0CE200193E19 /* Build configuration list for PBXNativeTarget "MobileBuyIntegration" */;
 			buildPhases = (
+				CBFE68672CF7544100A369B0 /* Generate Entitlements */,
 				6A9124C62CF6114E0076C21C /* Run Swiftformat over sample code */,
 				4EBBA7632A5F0CE200193E19 /* Sources */,
 				4EBBA7642A5F0CE200193E19 /* Frameworks */,
@@ -283,7 +281,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A0FA77E2CE4D7F7003070F8 /* MobileBuyIntegration.entitlements in Resources */,
 				4EBBA7772A5F0CE200193E19 /* LaunchScreen.storyboard in Resources */,
 				6A3D7ADC2B8E01460010EB27 /* Localizable.xcstrings in Resources */,
 				4EBBA7742A5F0CE200193E19 /* Assets.xcassets in Resources */,
@@ -329,6 +326,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"/opt/homebrew/bin:$PATH\"\n\nif which swiftformat >/dev/null; then\n\tswiftformat \"${SRCROOT}\" \nelse  \n\techo \"error: SwiftFormat not installed, download using \\\"brew install swiftformat\\\"\"\nfi\n";
+		};
+		CBFE68672CF7544100A369B0 /* Generate Entitlements */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Entitlements";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Samples/MobileBuyIntegration/MobileBuyIntegration/MobileBuyIntegration.entitlements",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Path to the entitlements file\nset -e\n\necho \"SRCROOT: ${SRCROOT}\"\n\nENTITLEMENTS_FILE=\"${SRCROOT}/Samples/MobileBuyIntegration/MobileBuyIntegration/MobileBuyIntegration.entitlements\"\nCONFIG_FILE=\"Storefront.xcconfig\"\nSTOREFRONT_DOMAIN=$(grep '^STOREFRONT_DOMAIN' \"$CONFIG_FILE\" | cut -d '=' -f2 | tr -d ' ')\n\nTEMPLATE_FILE=\"MobileBuyIntegration/MobileBuyIntegration.entitlements.template\"\nOUTPUT_FILE=\"MobileBuyIntegration/MobileBuyIntegration.entitlements\"\n\nif [ -z \"$STOREFRONT_DOMAIN\" ]; then\n  echo \"Error: STOREFRONT_DOMAIN is not set in Storefront.xcconfig\"\n  echo \"Add your store credentials here: $ENTITLEMENTS_FILE\"\n  exit 1\nfi\n\n# Check if the entitlements file exists\nif ! grep -q \"${STOREFRONT_DOMAIN}\" \"${OUTPUT_FILE}\"; then\n    sed \"s/{STOREFRONT_DOMAIN}/$STOREFRONT_DOMAIN?mode=developer/g\" \"$TEMPLATE_FILE\" >\"$OUTPUT_FILE\"\n    echo \"Success: Entitlements file generated at $OUTPUT_FILE with domain $STOREFRONT_DOMAIN\"\nelse\n    echo \"Entitlements already contains $STOREFRONT_DOMAIN. Will not re-create.\"\nfi  \n\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
